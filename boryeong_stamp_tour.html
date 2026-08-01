@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>가을 보령생태로드 · 모바일 스탬프 투어</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 <!-- =====================================================================
      카카오톡/문자 등 링크 공유 시 미리보기 카드에 사용되는 태그입니다.
@@ -21,20 +23,20 @@
 
 <style>
   :root{
-    --tide-teal:#0F5257;      /* 주 브랜드 컬러 - 갯벌/바다 */
-    --tide-teal-dark:#0A3A3E;
-    --sunset:#E8734A;         /* 포인트 - 무창포 낙조 */
-    --sunset-light:#F4A67E;
-    --sand:#F4EEE1;           /* 배경 - 해안사구 모래 */
-    --sand-deep:#E9DFC8;
-    --ink:#152225;            /* 텍스트 */
-    --ink-soft:#4B5B5C;
-    --mint:#B7DFD3;           /* 완료 상태 */
-    --line:#DCD3BE;
+    --tide-teal:#C2410C;      /* 주 브랜드 컬러 - 단풍 테라코타 */
+    --tide-teal-dark:#7C2D12;
+    --sunset:#D97706;         /* 포인트 - 은행나무 골드 */
+    --sunset-light:#FBBF24;
+    --sand:#FFF8EC;           /* 배경 - 따뜻한 아이보리 */
+    --sand-deep:#F5E4C8;
+    --ink:#3B2A1E;            /* 텍스트 - 짙은 밤색 */
+    --ink-soft:#8A6F55;
+    --mint:#F5DFA0;           /* 완료 상태 - 은행잎 골드 */
+    --line:#E9D8B8;
     --white:#FFFFFF;
     --radius-lg:20px;
     --radius-md:14px;
-    --shadow:0 8px 24px rgba(15,82,87,0.12);
+    --shadow:0 8px 24px rgba(194,65,12,0.14);
   }
   *{box-sizing:border-box;}
   body{
@@ -48,7 +50,7 @@
 
   /* ---------- HERO ---------- */
   .hero{
-    background:linear-gradient(165deg,var(--tide-teal) 0%,var(--tide-teal-dark) 62%,#08292c 100%);
+    background:linear-gradient(165deg,var(--tide-teal) 0%,var(--tide-teal-dark) 100%);
     color:var(--white);
     padding:20px 20px 30px;
     border-radius:0 0 28px 28px;
@@ -62,21 +64,22 @@
     opacity:.35;
   }
   .top-row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;}
-  .brand{font-size:12px;letter-spacing:.08em;color:var(--mint);font-weight:600;}
-  .test-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.75);}
+  .brand{font-size:14.5px;letter-spacing:.03em;color:rgba(255,255,255,.92);font-weight:700;display:flex;align-items:center;gap:6px;}
+  .brand .x{color:var(--sunset-light);font-weight:800;font-size:13.5px;}
+  .test-toggle{display:flex;align-items:center;gap:6px;font-size:12.5px;color:rgba(255,255,255,.75);}
   .switch{width:34px;height:19px;border-radius:20px;background:rgba(255,255,255,.25);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
   .switch.on{background:var(--sunset);}
   .switch .knob{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.2s;}
   .switch.on .knob{left:17px;}
 
   .hero h1{
-    font-size:28px;margin:18px 0 4px;font-weight:800;letter-spacing:-.02em;line-height:1.25;position:relative;z-index:1;
+    font-size:31.5px;margin:18px 0 4px;font-weight:800;letter-spacing:-.02em;line-height:1.25;position:relative;z-index:1;
   }
   .hero h1 em{font-style:normal;color:var(--sunset-light);}
-  .hero p.sub{margin:0 0 16px;font-size:13.5px;color:rgba(255,255,255,.8);line-height:1.6;position:relative;z-index:1;}
+  .hero p.sub{margin:0 0 16px;font-size:15.5px;color:rgba(255,255,255,.8);line-height:1.6;position:relative;z-index:1;}
   .badge-row{display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:1;}
   .badge{
-    font-size:11.5px;padding:6px 10px;border-radius:20px;background:rgba(255,255,255,.12);
+    font-size:13px;padding:6px 10px;border-radius:20px;background:rgba(255,255,255,.12);
     border:1px solid rgba(255,255,255,.2);color:#fff;
   }
 
@@ -86,26 +89,26 @@
     box-shadow:var(--shadow);padding:18px 16px 16px;position:relative;z-index:2;
   }
   .passport-title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
-  .passport-title h2{font-size:14px;margin:0;color:var(--tide-teal-dark);font-weight:700;}
-  .passport-count{font-size:13px;font-weight:800;color:var(--sunset);}
+  .passport-title h2{font-size:16px;margin:0;color:var(--tide-teal-dark);font-weight:700;}
+  .passport-count{font-size:14.5px;font-weight:800;color:var(--sunset);}
   .trail{display:flex;align-items:center;justify-content:space-between;position:relative;}
   .trail-line{position:absolute;top:20px;left:36px;right:36px;height:3px;background:var(--line);border-radius:2px;z-index:0;}
   .trail-line-fill{position:absolute;top:20px;left:36px;height:3px;background:var(--sunset);border-radius:2px;z-index:1;transition:width .3s;}
   .stop{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:2;cursor:pointer;}
   .stop-dot{
     width:40px;height:40px;border-radius:50%;background:var(--white);border:2.5px solid var(--line);
-    display:flex;align-items:center;justify-content:center;font-size:17px;transition:.25s;
+    display:flex;align-items:center;justify-content:center;font-size:19px;transition:.25s;
   }
   .stop.done .stop-dot{border-color:var(--sunset);background:var(--sunset);color:#fff;}
-  .stop-label{font-size:10.5px;margin-top:6px;color:var(--ink-soft);text-align:center;font-weight:600;max-width:70px;line-height:1.3;}
+  .stop-label{font-size:12px;margin-top:6px;color:var(--ink-soft);text-align:center;font-weight:600;max-width:70px;line-height:1.3;}
   .stop.done .stop-label{color:var(--tide-teal-dark);}
 
   /* ---------- SECTION ---------- */
   .section{padding:26px 20px 0;}
   .section-head{margin-bottom:12px;}
-  .section-head .eyebrow{font-size:11px;letter-spacing:.08em;color:var(--sunset);font-weight:700;text-transform:uppercase;}
-  .section-head h3{font-size:18px;margin:4px 0 0;font-weight:800;color:var(--tide-teal-dark);}
-  .section-head p{font-size:13px;color:var(--ink-soft);margin:6px 0 0;line-height:1.6;}
+  .section-head .eyebrow{font-size:12.5px;letter-spacing:.08em;color:var(--sunset);font-weight:700;text-transform:uppercase;}
+  .section-head h3{font-size:20.5px;margin:4px 0 0;font-weight:800;color:var(--tide-teal-dark);}
+  .section-head p{font-size:14.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.6;}
 
   /* ---------- STATION CARD ---------- */
   .station{
@@ -115,32 +118,32 @@
   .station-top{display:flex;gap:12px;align-items:flex-start;}
   .station-num{
     width:30px;height:30px;border-radius:9px;background:var(--sand-deep);color:var(--tide-teal-dark);
-    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14.5px;flex-shrink:0;
   }
   .station.done .station-num{background:var(--tide-teal);color:#fff;}
   .station-info{flex:1;min-width:0;}
-  .station-info h4{margin:0;font-size:15.5px;font-weight:800;color:var(--ink);}
-  .station-info .tag{font-size:11.5px;color:var(--sunset);font-weight:700;margin-top:2px;}
-  .station-info p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin:8px 0 0;}
+  .station-info h4{margin:0;font-size:17.5px;font-weight:800;color:var(--ink);}
+  .station-info .tag{font-size:13px;color:var(--sunset);font-weight:700;margin-top:2px;}
+  .station-info p{font-size:14px;color:var(--ink-soft);line-height:1.6;margin:8px 0 0;}
   .status-pill{
-    font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;flex-shrink:0;
+    font-size:12px;font-weight:700;padding:4px 9px;border-radius:20px;flex-shrink:0;
     background:var(--sand-deep);color:var(--ink-soft);white-space:nowrap;
   }
   .station.done .status-pill{background:var(--mint);color:var(--tide-teal-dark);}
 
   .gps-btn{
     width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;
-    background:var(--tide-teal);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;
+    background:var(--tide-teal);color:#fff;font-size:15.5px;font-weight:700;cursor:pointer;
     display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;
   }
   .gps-btn:active{transform:scale(.98);}
   .gps-btn.done{background:var(--mint);color:var(--tide-teal-dark);}
   .gps-btn:disabled{opacity:.55;}
-  .gps-feedback{font-size:11.5px;color:var(--ink-soft);margin-top:8px;text-align:center;line-height:1.5;}
+  .gps-feedback{font-size:13px;color:var(--ink-soft);margin-top:8px;text-align:center;line-height:1.5;}
   .gps-feedback.warn{color:var(--sunset);font-weight:600;}
   .test-btn{
     width:100%;margin-top:8px;padding:9px;border:1px dashed var(--sunset);border-radius:10px;
-    background:#FFF6F0;color:var(--sunset);font-size:11.5px;font-weight:700;cursor:pointer;
+    background:#FFF6F0;color:var(--sunset);font-size:13px;font-weight:700;cursor:pointer;
   }
 
   /* ---------- REWARD ---------- */
@@ -151,49 +154,122 @@
   }
   .tier .ico{
     width:42px;height:42px;border-radius:12px;background:var(--sand-deep);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-size:19px;
+    display:flex;align-items:center;justify-content:center;font-size:21.5px;
   }
-  .tier h5{margin:0;font-size:13.5px;font-weight:800;color:var(--ink);}
-  .tier p{margin:3px 0 0;font-size:11.5px;color:var(--ink-soft);line-height:1.5;}
+  .tier h5{margin:0;font-size:15.5px;font-weight:800;color:var(--ink);}
+  .tier p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);line-height:1.5;}
 
   .entry-card{
     background:var(--tide-teal-dark);border-radius:var(--radius-lg);padding:20px;margin-top:16px;color:#fff;
   }
   .entry-card.locked{background:var(--sand-deep);color:var(--ink-soft);}
-  .entry-card h4{margin:0 0 4px;font-size:15px;font-weight:800;}
-  .entry-card p.desc{font-size:12px;margin:0 0 16px;line-height:1.6;opacity:.85;}
+  .entry-card h4{margin:0 0 4px;font-size:17px;font-weight:800;}
+  .entry-card p.desc{font-size:13.5px;margin:0 0 16px;line-height:1.6;opacity:.85;}
   .entry-card.locked p.desc{opacity:1;}
   .field{margin-bottom:10px;}
-  .field label{font-size:11.5px;font-weight:700;display:block;margin-bottom:5px;opacity:.9;}
+  .field label{font-size:13px;font-weight:700;display:block;margin-bottom:5px;opacity:.9;}
   .field input{
-    width:100%;padding:11px 12px;border-radius:10px;border:none;font-size:14px;
+    width:100%;padding:11px 12px;border-radius:10px;border:none;font-size:16px;
     background:rgba(255,255,255,.12);color:#fff;outline:none;
   }
   .field input::placeholder{color:rgba(255,255,255,.5);}
   .entry-card.locked .field input{background:#fff;color:var(--ink);border:1px solid var(--line);}
-  .consent{display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.5;margin:12px 0;opacity:.85;}
+  .consent{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.5;margin:12px 0;opacity:.85;}
   .consent input{margin-top:2px;}
   .submit-btn{
     width:100%;padding:13px;border:none;border-radius:12px;background:var(--sunset);color:#fff;
-    font-size:14px;font-weight:800;cursor:pointer;
+    font-size:16px;font-weight:800;cursor:pointer;
   }
   .submit-btn:disabled{background:rgba(255,255,255,.15);color:rgba(255,255,255,.4);cursor:not-allowed;}
-  .lock-msg{font-size:12.5px;text-align:center;padding:10px;font-weight:600;}
+  .lock-msg{font-size:14px;text-align:center;padding:10px;font-weight:600;}
 
   .success-box{
     background:var(--mint);border-radius:var(--radius-md);padding:16px;text-align:center;margin-top:16px;
   }
-  .success-box .no{font-size:20px;font-weight:900;color:var(--tide-teal-dark);letter-spacing:.03em;margin:6px 0;}
-  .success-box p{margin:0;font-size:11.5px;color:var(--tide-teal-dark);line-height:1.6;}
+  .success-box .no{font-size:22.5px;font-weight:900;color:var(--tide-teal-dark);letter-spacing:.03em;margin:6px 0;}
+  .success-box p{margin:0;font-size:13px;color:var(--tide-teal-dark);line-height:1.6;}
 
   .footer-note{
     margin:28px 20px 0;padding:16px;border-radius:var(--radius-md);background:var(--sand-deep);
-    font-size:11px;color:var(--ink-soft);line-height:1.7;
+    font-size:12.5px;color:var(--ink-soft);line-height:1.7;
   }
   .footer-note b{color:var(--tide-teal-dark);}
   .footer-note .warn-line{color:var(--sunset);font-weight:700;}
 
   ::selection{background:var(--sunset-light);}
+/* ---------- WIZARD STEPS ---------- */
+.step-dots{display:flex;justify-content:center;gap:8px;margin:14px 0 6px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.2s;}
+.step-dot.active{background:var(--sunset);width:22px;border-radius:5px;}
+.step-dot.done{background:var(--tide-teal);}
+.wizard-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px 18px;margin:16px;border:1px solid rgba(15,82,87,.06);}
+.wizard-card h2{margin:0 0 6px;font-size:21.5px;font-weight:800;color:var(--tide-teal-dark);}
+.wizard-card p.lead{font-size:14px;color:var(--ink-soft);line-height:1.6;margin:0 0 18px;}
+.otp-row{display:flex;gap:8px;}
+.otp-row input{flex:1;}
+.otp-row button{width:auto;flex-shrink:0;padding:0 16px;margin:0;}
+.photo-frame{
+  border:2px dashed var(--line);border-radius:14px;aspect-ratio:4/3;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:8px;color:var(--ink-soft);font-size:14px;
+  background:var(--sand);overflow:hidden;position:relative;cursor:pointer;
+}
+.photo-frame img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.photo-frame .cam-icon{font-size:34px;}
+.photo-frame.filled{border-style:solid;border-color:var(--mint);}
+.retake-btn{position:absolute;top:8px;right:8px;background:rgba(21,34,37,.65);color:#fff;font-size:12.5px;
+  padding:5px 10px;border-radius:20px;z-index:2;}
+.link-btn{background:none;border:none;color:var(--tide-teal);font-size:14px;font-weight:700;
+  text-decoration:underline;cursor:pointer;padding:0;}
+.step-back{font-size:13.5px;color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;}
+#stationsMap{width:100%;height:230px;border:0;margin:0;background:var(--sand);}
+.badge-row-sm{display:flex;gap:6px;margin-top:8px;}
+.mini-pill{font-size:12px;font-weight:700;padding:5px 9px;border-radius:20px;background:var(--sand-deep);color:var(--ink-soft);}
+.mini-pill.ok{background:var(--mint);color:var(--tide-teal-dark);}
+
+/* 3단계 안내 카드 */
+.step-num-row{display:flex;flex-direction:column;gap:8px;}
+.step-num-card{background:var(--sand);border-radius:12px;padding:12px 14px;font-size:14.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:10px;}
+.step-num-card .num{width:22px;height:22px;border-radius:50%;background:var(--sunset);color:#fff;font-size:13.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hint-text{font-size:13px;color:var(--ink-soft);margin-top:5px;line-height:1.5;}
+
+/* 약관 동의 아이템 */
+.consent-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:var(--sand);}
+.consent-item label{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14.5px;font-weight:700;color:var(--ink);}
+.consent-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--sunset);flex-shrink:0;}
+.consent-item .chev{margin-left:auto;color:var(--ink-soft);font-size:12.5px;cursor:pointer;padding:4px;}
+.consent-detail{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-soft);line-height:1.6;}
+.disclosure-text{margin-top:16px;font-size:12px;color:var(--ink-soft);line-height:1.7;padding:12px;background:var(--sand);border-radius:10px;}
+
+/* 장소 리스트 (row 형태) */
+.station-row{display:flex;align-items:center;gap:12px;background:var(--white);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border:1px solid rgba(20,184,166,.08);cursor:pointer;}
+.station-row.done{border-color:var(--mint);}
+.ring{width:36px;height:36px;border-radius:50%;border:2.5px dashed var(--sunset);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--tide-teal);}
+.ring.done{border-style:solid;border-color:var(--tide-teal);background:var(--mint);}
+.station-row-info{flex:1;min-width:0;}
+.station-row-info h4{margin:0;font-size:16px;font-weight:800;color:var(--ink);}
+.pill-btn{border:1.5px solid var(--sunset);color:var(--sunset);background:none;border-radius:20px;padding:8px 14px;font-size:13.5px;font-weight:700;flex-shrink:0;cursor:pointer;}
+.station-row.done .pill-btn{border-color:var(--tide-teal);color:var(--tide-teal-dark);}
+.test-pill{border:1.5px dashed var(--ink-soft);color:var(--ink-soft);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;}
+
+/* 인증 모달(바텀시트) */
+.modal-backdrop{position:fixed;inset:0;background:rgba(35,50,56,.55);display:flex;align-items:flex-end;z-index:50;}
+.modal-sheet{background:var(--white);border-radius:22px 22px 0 0;padding:22px 18px 26px;width:100%;max-width:480px;margin:0 auto;max-height:85vh;overflow-y:auto;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.modal-head h3{margin:0;font-size:19px;font-weight:800;color:var(--tide-teal-dark);}
+.modal-close{font-size:18px;color:var(--ink-soft);cursor:pointer;padding:4px;}
+.modal-section{margin-top:16px;}
+.modal-section-title{font-size:15.5px;font-weight:800;color:var(--ink);margin-bottom:8px;}
+.modal-divider{height:1px;background:var(--line);margin:18px 0;}
+.gps-btn-outline{width:100%;padding:12px;border:1.5px solid var(--sunset);border-radius:12px;background:none;color:var(--sunset);font-size:15.5px;font-weight:700;cursor:pointer;}
+
+/* 완료 화면 체크 아이콘 */
+.done-check{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--sunset),var(--tide-teal));color:#fff;font-size:38.5px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.info-box{background:var(--mint);color:var(--tide-teal-dark);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.6;margin-top:10px;}
+.wizard-card .field input{background:var(--sand);color:var(--ink);border:1px solid var(--line);}
+.wizard-card .field input::placeholder{color:var(--ink-soft);opacity:.6;}
+.wizard-card .field input:disabled{opacity:.55;}
+.wizard-card .field label{color:var(--ink-soft);opacity:1;}
+.wizard-card .consent{opacity:1;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -201,2311 +277,10 @@
 
 <script>
 /* =====================================================================
-   QR 코드 생성 라이브러리 (qrcode-generator, MIT License, Kazuhiko Arase)
-   외부 CDN 의존 없이 동작하도록 파일에 직접 포함했습니다.
+   설정값 — 보고서 내용 기반. 실제 운영 전 문구·경품 배분은 반드시 재검증할 것.
    ===================================================================== */
-//---------------------------------------------------------------------
-//
-// QR Code Generator for JavaScript
-//
-// Copyright (c) 2009 Kazuhiko Arase
-//
-// URL: http://www.d-project.com/
-//
-// Licensed under the MIT license:
-//  http://www.opensource.org/licenses/mit-license.php
-//
-// The word 'QR Code' is registered trademark of
-// DENSO WAVE INCORPORATED
-//  http://www.denso-wave.com/qrcode/faqpatent-e.html
-//
-//---------------------------------------------------------------------
-
-var qrcode = function() {
-
-  //---------------------------------------------------------------------
-  // qrcode
-  //---------------------------------------------------------------------
-
-  /**
-   * qrcode
-   * @param typeNumber 1 to 40
-   * @param errorCorrectionLevel 'L','M','Q','H'
-   */
-  var qrcode = function(typeNumber, errorCorrectionLevel) {
-
-    var PAD0 = 0xEC;
-    var PAD1 = 0x11;
-
-    var _typeNumber = typeNumber;
-    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
-    var _modules = null;
-    var _moduleCount = 0;
-    var _dataCache = null;
-    var _dataList = [];
-
-    var _this = {};
-
-    var makeImpl = function(test, maskPattern) {
-
-      _moduleCount = _typeNumber * 4 + 17;
-      _modules = function(moduleCount) {
-        var modules = new Array(moduleCount);
-        for (var row = 0; row < moduleCount; row += 1) {
-          modules[row] = new Array(moduleCount);
-          for (var col = 0; col < moduleCount; col += 1) {
-            modules[row][col] = null;
-          }
-        }
-        return modules;
-      }(_moduleCount);
-
-      setupPositionProbePattern(0, 0);
-      setupPositionProbePattern(_moduleCount - 7, 0);
-      setupPositionProbePattern(0, _moduleCount - 7);
-      setupPositionAdjustPattern();
-      setupTimingPattern();
-      setupTypeInfo(test, maskPattern);
-
-      if (_typeNumber >= 7) {
-        setupTypeNumber(test);
-      }
-
-      if (_dataCache == null) {
-        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
-      }
-
-      mapData(_dataCache, maskPattern);
-    };
-
-    var setupPositionProbePattern = function(row, col) {
-
-      for (var r = -1; r <= 7; r += 1) {
-
-        if (row + r <= -1 || _moduleCount <= row + r) continue;
-
-        for (var c = -1; c <= 7; c += 1) {
-
-          if (col + c <= -1 || _moduleCount <= col + c) continue;
-
-          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
-              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
-              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
-            _modules[row + r][col + c] = true;
-          } else {
-            _modules[row + r][col + c] = false;
-          }
-        }
-      }
-    };
-
-    var getBestMaskPattern = function() {
-
-      var minLostPoint = 0;
-      var pattern = 0;
-
-      for (var i = 0; i < 8; i += 1) {
-
-        makeImpl(true, i);
-
-        var lostPoint = QRUtil.getLostPoint(_this);
-
-        if (i == 0 || minLostPoint > lostPoint) {
-          minLostPoint = lostPoint;
-          pattern = i;
-        }
-      }
-
-      return pattern;
-    };
-
-    var setupTimingPattern = function() {
-
-      for (var r = 8; r < _moduleCount - 8; r += 1) {
-        if (_modules[r][6] != null) {
-          continue;
-        }
-        _modules[r][6] = (r % 2 == 0);
-      }
-
-      for (var c = 8; c < _moduleCount - 8; c += 1) {
-        if (_modules[6][c] != null) {
-          continue;
-        }
-        _modules[6][c] = (c % 2 == 0);
-      }
-    };
-
-    var setupPositionAdjustPattern = function() {
-
-      var pos = QRUtil.getPatternPosition(_typeNumber);
-
-      for (var i = 0; i < pos.length; i += 1) {
-
-        for (var j = 0; j < pos.length; j += 1) {
-
-          var row = pos[i];
-          var col = pos[j];
-
-          if (_modules[row][col] != null) {
-            continue;
-          }
-
-          for (var r = -2; r <= 2; r += 1) {
-
-            for (var c = -2; c <= 2; c += 1) {
-
-              if (r == -2 || r == 2 || c == -2 || c == 2
-                  || (r == 0 && c == 0) ) {
-                _modules[row + r][col + c] = true;
-              } else {
-                _modules[row + r][col + c] = false;
-              }
-            }
-          }
-        }
-      }
-    };
-
-    var setupTypeNumber = function(test) {
-
-      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
-
-      for (var i = 0; i < 18; i += 1) {
-        var mod = (!test && ( (bits >> i) & 1) == 1);
-        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
-      }
-
-      for (var i = 0; i < 18; i += 1) {
-        var mod = (!test && ( (bits >> i) & 1) == 1);
-        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
-      }
-    };
-
-    var setupTypeInfo = function(test, maskPattern) {
-
-      var data = (_errorCorrectionLevel << 3) | maskPattern;
-      var bits = QRUtil.getBCHTypeInfo(data);
-
-      // vertical
-      for (var i = 0; i < 15; i += 1) {
-
-        var mod = (!test && ( (bits >> i) & 1) == 1);
-
-        if (i < 6) {
-          _modules[i][8] = mod;
-        } else if (i < 8) {
-          _modules[i + 1][8] = mod;
-        } else {
-          _modules[_moduleCount - 15 + i][8] = mod;
-        }
-      }
-
-      // horizontal
-      for (var i = 0; i < 15; i += 1) {
-
-        var mod = (!test && ( (bits >> i) & 1) == 1);
-
-        if (i < 8) {
-          _modules[8][_moduleCount - i - 1] = mod;
-        } else if (i < 9) {
-          _modules[8][15 - i - 1 + 1] = mod;
-        } else {
-          _modules[8][15 - i - 1] = mod;
-        }
-      }
-
-      // fixed module
-      _modules[_moduleCount - 8][8] = (!test);
-    };
-
-    var mapData = function(data, maskPattern) {
-
-      var inc = -1;
-      var row = _moduleCount - 1;
-      var bitIndex = 7;
-      var byteIndex = 0;
-      var maskFunc = QRUtil.getMaskFunction(maskPattern);
-
-      for (var col = _moduleCount - 1; col > 0; col -= 2) {
-
-        if (col == 6) col -= 1;
-
-        while (true) {
-
-          for (var c = 0; c < 2; c += 1) {
-
-            if (_modules[row][col - c] == null) {
-
-              var dark = false;
-
-              if (byteIndex < data.length) {
-                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
-              }
-
-              var mask = maskFunc(row, col - c);
-
-              if (mask) {
-                dark = !dark;
-              }
-
-              _modules[row][col - c] = dark;
-              bitIndex -= 1;
-
-              if (bitIndex == -1) {
-                byteIndex += 1;
-                bitIndex = 7;
-              }
-            }
-          }
-
-          row += inc;
-
-          if (row < 0 || _moduleCount <= row) {
-            row -= inc;
-            inc = -inc;
-            break;
-          }
-        }
-      }
-    };
-
-    var createBytes = function(buffer, rsBlocks) {
-
-      var offset = 0;
-
-      var maxDcCount = 0;
-      var maxEcCount = 0;
-
-      var dcdata = new Array(rsBlocks.length);
-      var ecdata = new Array(rsBlocks.length);
-
-      for (var r = 0; r < rsBlocks.length; r += 1) {
-
-        var dcCount = rsBlocks[r].dataCount;
-        var ecCount = rsBlocks[r].totalCount - dcCount;
-
-        maxDcCount = Math.max(maxDcCount, dcCount);
-        maxEcCount = Math.max(maxEcCount, ecCount);
-
-        dcdata[r] = new Array(dcCount);
-
-        for (var i = 0; i < dcdata[r].length; i += 1) {
-          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
-        }
-        offset += dcCount;
-
-        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
-        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
-
-        var modPoly = rawPoly.mod(rsPoly);
-        ecdata[r] = new Array(rsPoly.getLength() - 1);
-        for (var i = 0; i < ecdata[r].length; i += 1) {
-          var modIndex = i + modPoly.getLength() - ecdata[r].length;
-          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
-        }
-      }
-
-      var totalCodeCount = 0;
-      for (var i = 0; i < rsBlocks.length; i += 1) {
-        totalCodeCount += rsBlocks[i].totalCount;
-      }
-
-      var data = new Array(totalCodeCount);
-      var index = 0;
-
-      for (var i = 0; i < maxDcCount; i += 1) {
-        for (var r = 0; r < rsBlocks.length; r += 1) {
-          if (i < dcdata[r].length) {
-            data[index] = dcdata[r][i];
-            index += 1;
-          }
-        }
-      }
-
-      for (var i = 0; i < maxEcCount; i += 1) {
-        for (var r = 0; r < rsBlocks.length; r += 1) {
-          if (i < ecdata[r].length) {
-            data[index] = ecdata[r][i];
-            index += 1;
-          }
-        }
-      }
-
-      return data;
-    };
-
-    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
-
-      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
-
-      var buffer = qrBitBuffer();
-
-      for (var i = 0; i < dataList.length; i += 1) {
-        var data = dataList[i];
-        buffer.put(data.getMode(), 4);
-        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
-        data.write(buffer);
-      }
-
-      // calc num max data.
-      var totalDataCount = 0;
-      for (var i = 0; i < rsBlocks.length; i += 1) {
-        totalDataCount += rsBlocks[i].dataCount;
-      }
-
-      if (buffer.getLengthInBits() > totalDataCount * 8) {
-        throw 'code length overflow. ('
-          + buffer.getLengthInBits()
-          + '>'
-          + totalDataCount * 8
-          + ')';
-      }
-
-      // end code
-      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
-        buffer.put(0, 4);
-      }
-
-      // padding
-      while (buffer.getLengthInBits() % 8 != 0) {
-        buffer.putBit(false);
-      }
-
-      // padding
-      while (true) {
-
-        if (buffer.getLengthInBits() >= totalDataCount * 8) {
-          break;
-        }
-        buffer.put(PAD0, 8);
-
-        if (buffer.getLengthInBits() >= totalDataCount * 8) {
-          break;
-        }
-        buffer.put(PAD1, 8);
-      }
-
-      return createBytes(buffer, rsBlocks);
-    };
-
-    _this.addData = function(data, mode) {
-
-      mode = mode || 'Byte';
-
-      var newData = null;
-
-      switch(mode) {
-      case 'Numeric' :
-        newData = qrNumber(data);
-        break;
-      case 'Alphanumeric' :
-        newData = qrAlphaNum(data);
-        break;
-      case 'Byte' :
-        newData = qr8BitByte(data);
-        break;
-      case 'Kanji' :
-        newData = qrKanji(data);
-        break;
-      default :
-        throw 'mode:' + mode;
-      }
-
-      _dataList.push(newData);
-      _dataCache = null;
-    };
-
-    _this.isDark = function(row, col) {
-      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
-        throw row + ',' + col;
-      }
-      return _modules[row][col];
-    };
-
-    _this.getModuleCount = function() {
-      return _moduleCount;
-    };
-
-    _this.make = function() {
-      if (_typeNumber < 1) {
-        var typeNumber = 1;
-
-        for (; typeNumber < 40; typeNumber++) {
-          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
-          var buffer = qrBitBuffer();
-
-          for (var i = 0; i < _dataList.length; i++) {
-            var data = _dataList[i];
-            buffer.put(data.getMode(), 4);
-            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
-            data.write(buffer);
-          }
-
-          var totalDataCount = 0;
-          for (var i = 0; i < rsBlocks.length; i++) {
-            totalDataCount += rsBlocks[i].dataCount;
-          }
-
-          if (buffer.getLengthInBits() <= totalDataCount * 8) {
-            break;
-          }
-        }
-
-        _typeNumber = typeNumber;
-      }
-
-      makeImpl(false, getBestMaskPattern() );
-    };
-
-    _this.createTableTag = function(cellSize, margin) {
-
-      cellSize = cellSize || 2;
-      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
-
-      var qrHtml = '';
-
-      qrHtml += '<table style="';
-      qrHtml += ' border-width: 0px; border-style: none;';
-      qrHtml += ' border-collapse: collapse;';
-      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
-      qrHtml += '">';
-      qrHtml += '<tbody>';
-
-      for (var r = 0; r < _this.getModuleCount(); r += 1) {
-
-        qrHtml += '<tr>';
-
-        for (var c = 0; c < _this.getModuleCount(); c += 1) {
-          qrHtml += '<td style="';
-          qrHtml += ' border-width: 0px; border-style: none;';
-          qrHtml += ' border-collapse: collapse;';
-          qrHtml += ' padding: 0px; margin: 0px;';
-          qrHtml += ' width: ' + cellSize + 'px;';
-          qrHtml += ' height: ' + cellSize + 'px;';
-          qrHtml += ' background-color: ';
-          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
-          qrHtml += ';';
-          qrHtml += '"/>';
-        }
-
-        qrHtml += '</tr>';
-      }
-
-      qrHtml += '</tbody>';
-      qrHtml += '</table>';
-
-      return qrHtml;
-    };
-
-    _this.createSvgTag = function(cellSize, margin, alt, title) {
-
-      var opts = {};
-      if (typeof arguments[0] == 'object') {
-        // Called by options.
-        opts = arguments[0];
-        // overwrite cellSize and margin.
-        cellSize = opts.cellSize;
-        margin = opts.margin;
-        alt = opts.alt;
-        title = opts.title;
-      }
-
-      cellSize = cellSize || 2;
-      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
-
-      // Compose alt property surrogate
-      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
-      alt.text = alt.text || null;
-      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
-
-      // Compose title property surrogate
-      title = (typeof title === 'string') ? {text: title} : title || {};
-      title.text = title.text || null;
-      title.id = (title.text) ? title.id || 'qrcode-title' : null;
-
-      var size = _this.getModuleCount() * cellSize + margin * 2;
-      var c, mc, r, mr, qrSvg='', rect;
-
-      rect = 'l' + cellSize + ',0 0,' + cellSize +
-        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
-
-      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
-      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
-      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
-      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
-      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
-          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
-      qrSvg += '>';
-      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
-          escapeXml(title.text) + '</title>' : '';
-      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
-          escapeXml(alt.text) + '</description>' : '';
-      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
-      qrSvg += '<path d="';
-
-      for (r = 0; r < _this.getModuleCount(); r += 1) {
-        mr = r * cellSize + margin;
-        for (c = 0; c < _this.getModuleCount(); c += 1) {
-          if (_this.isDark(r, c) ) {
-            mc = c*cellSize+margin;
-            qrSvg += 'M' + mc + ',' + mr + rect;
-          }
-        }
-      }
-
-      qrSvg += '" stroke="transparent" fill="black"/>';
-      qrSvg += '</svg>';
-
-      return qrSvg;
-    };
-
-    _this.createDataURL = function(cellSize, margin) {
-
-      cellSize = cellSize || 2;
-      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
-
-      var size = _this.getModuleCount() * cellSize + margin * 2;
-      var min = margin;
-      var max = size - margin;
-
-      return createDataURL(size, size, function(x, y) {
-        if (min <= x && x < max && min <= y && y < max) {
-          var c = Math.floor( (x - min) / cellSize);
-          var r = Math.floor( (y - min) / cellSize);
-          return _this.isDark(r, c)? 0 : 1;
-        } else {
-          return 1;
-        }
-      } );
-    };
-
-    _this.createImgTag = function(cellSize, margin, alt) {
-
-      cellSize = cellSize || 2;
-      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
-
-      var size = _this.getModuleCount() * cellSize + margin * 2;
-
-      var img = '';
-      img += '<img';
-      img += '\u0020src="';
-      img += _this.createDataURL(cellSize, margin);
-      img += '"';
-      img += '\u0020width="';
-      img += size;
-      img += '"';
-      img += '\u0020height="';
-      img += size;
-      img += '"';
-      if (alt) {
-        img += '\u0020alt="';
-        img += escapeXml(alt);
-        img += '"';
-      }
-      img += '/>';
-
-      return img;
-    };
-
-    var escapeXml = function(s) {
-      var escaped = '';
-      for (var i = 0; i < s.length; i += 1) {
-        var c = s.charAt(i);
-        switch(c) {
-        case '<': escaped += '&lt;'; break;
-        case '>': escaped += '&gt;'; break;
-        case '&': escaped += '&amp;'; break;
-        case '"': escaped += '&quot;'; break;
-        default : escaped += c; break;
-        }
-      }
-      return escaped;
-    };
-
-    var _createHalfASCII = function(margin) {
-      var cellSize = 1;
-      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
-
-      var size = _this.getModuleCount() * cellSize + margin * 2;
-      var min = margin;
-      var max = size - margin;
-
-      var y, x, r1, r2, p;
-
-      var blocks = {
-        '██': '█',
-        '█ ': '▀',
-        ' █': '▄',
-        '  ': ' '
-      };
-
-      var blocksLastLineNoMargin = {
-        '██': '▀',
-        '█ ': '▀',
-        ' █': ' ',
-        '  ': ' '
-      };
-
-      var ascii = '';
-      for (y = 0; y < size; y += 2) {
-        r1 = Math.floor((y - min) / cellSize);
-        r2 = Math.floor((y + 1 - min) / cellSize);
-        for (x = 0; x < size; x += 1) {
-          p = '█';
-
-          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
-            p = ' ';
-          }
-
-          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
-            p += ' ';
-          }
-          else {
-            p += '█';
-          }
-
-          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
-          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
-        }
-
-        ascii += '\n';
-      }
-
-      if (size % 2 && margin > 0) {
-        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
-      }
-
-      return ascii.substring(0, ascii.length-1);
-    };
-
-    _this.createASCII = function(cellSize, margin) {
-      cellSize = cellSize || 1;
-
-      if (cellSize < 2) {
-        return _createHalfASCII(margin);
-      }
-
-      cellSize -= 1;
-      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
-
-      var size = _this.getModuleCount() * cellSize + margin * 2;
-      var min = margin;
-      var max = size - margin;
-
-      var y, x, r, p;
-
-      var white = Array(cellSize+1).join('██');
-      var black = Array(cellSize+1).join('  ');
-
-      var ascii = '';
-      var line = '';
-      for (y = 0; y < size; y += 1) {
-        r = Math.floor( (y - min) / cellSize);
-        line = '';
-        for (x = 0; x < size; x += 1) {
-          p = 1;
-
-          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
-            p = 0;
-          }
-
-          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
-          line += p ? white : black;
-        }
-
-        for (r = 0; r < cellSize; r += 1) {
-          ascii += line + '\n';
-        }
-      }
-
-      return ascii.substring(0, ascii.length-1);
-    };
-
-    _this.renderTo2dContext = function(context, cellSize) {
-      cellSize = cellSize || 2;
-      var length = _this.getModuleCount();
-      for (var row = 0; row < length; row++) {
-        for (var col = 0; col < length; col++) {
-          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
-          context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-        }
-      }
-    }
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // qrcode.stringToBytes
-  //---------------------------------------------------------------------
-
-  qrcode.stringToBytesFuncs = {
-    'default' : function(s) {
-      var bytes = [];
-      for (var i = 0; i < s.length; i += 1) {
-        var c = s.charCodeAt(i);
-        bytes.push(c & 0xff);
-      }
-      return bytes;
-    }
-  };
-
-  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
-
-  //---------------------------------------------------------------------
-  // qrcode.createStringToBytes
-  //---------------------------------------------------------------------
-
-  /**
-   * @param unicodeData base64 string of byte array.
-   * [16bit Unicode],[16bit Bytes], ...
-   * @param numChars
-   */
-  qrcode.createStringToBytes = function(unicodeData, numChars) {
-
-    // create conversion map.
-
-    var unicodeMap = function() {
-
-      var bin = base64DecodeInputStream(unicodeData);
-      var read = function() {
-        var b = bin.read();
-        if (b == -1) throw 'eof';
-        return b;
-      };
-
-      var count = 0;
-      var unicodeMap = {};
-      while (true) {
-        var b0 = bin.read();
-        if (b0 == -1) break;
-        var b1 = read();
-        var b2 = read();
-        var b3 = read();
-        var k = String.fromCharCode( (b0 << 8) | b1);
-        var v = (b2 << 8) | b3;
-        unicodeMap[k] = v;
-        count += 1;
-      }
-      if (count != numChars) {
-        throw count + ' != ' + numChars;
-      }
-
-      return unicodeMap;
-    }();
-
-    var unknownChar = '?'.charCodeAt(0);
-
-    return function(s) {
-      var bytes = [];
-      for (var i = 0; i < s.length; i += 1) {
-        var c = s.charCodeAt(i);
-        if (c < 128) {
-          bytes.push(c);
-        } else {
-          var b = unicodeMap[s.charAt(i)];
-          if (typeof b == 'number') {
-            if ( (b & 0xff) == b) {
-              // 1byte
-              bytes.push(b);
-            } else {
-              // 2bytes
-              bytes.push(b >>> 8);
-              bytes.push(b & 0xff);
-            }
-          } else {
-            bytes.push(unknownChar);
-          }
-        }
-      }
-      return bytes;
-    };
-  };
-
-  //---------------------------------------------------------------------
-  // QRMode
-  //---------------------------------------------------------------------
-
-  var QRMode = {
-    MODE_NUMBER :    1 << 0,
-    MODE_ALPHA_NUM : 1 << 1,
-    MODE_8BIT_BYTE : 1 << 2,
-    MODE_KANJI :     1 << 3
-  };
-
-  //---------------------------------------------------------------------
-  // QRErrorCorrectionLevel
-  //---------------------------------------------------------------------
-
-  var QRErrorCorrectionLevel = {
-    L : 1,
-    M : 0,
-    Q : 3,
-    H : 2
-  };
-
-  //---------------------------------------------------------------------
-  // QRMaskPattern
-  //---------------------------------------------------------------------
-
-  var QRMaskPattern = {
-    PATTERN000 : 0,
-    PATTERN001 : 1,
-    PATTERN010 : 2,
-    PATTERN011 : 3,
-    PATTERN100 : 4,
-    PATTERN101 : 5,
-    PATTERN110 : 6,
-    PATTERN111 : 7
-  };
-
-  //---------------------------------------------------------------------
-  // QRUtil
-  //---------------------------------------------------------------------
-
-  var QRUtil = function() {
-
-    var PATTERN_POSITION_TABLE = [
-      [],
-      [6, 18],
-      [6, 22],
-      [6, 26],
-      [6, 30],
-      [6, 34],
-      [6, 22, 38],
-      [6, 24, 42],
-      [6, 26, 46],
-      [6, 28, 50],
-      [6, 30, 54],
-      [6, 32, 58],
-      [6, 34, 62],
-      [6, 26, 46, 66],
-      [6, 26, 48, 70],
-      [6, 26, 50, 74],
-      [6, 30, 54, 78],
-      [6, 30, 56, 82],
-      [6, 30, 58, 86],
-      [6, 34, 62, 90],
-      [6, 28, 50, 72, 94],
-      [6, 26, 50, 74, 98],
-      [6, 30, 54, 78, 102],
-      [6, 28, 54, 80, 106],
-      [6, 32, 58, 84, 110],
-      [6, 30, 58, 86, 114],
-      [6, 34, 62, 90, 118],
-      [6, 26, 50, 74, 98, 122],
-      [6, 30, 54, 78, 102, 126],
-      [6, 26, 52, 78, 104, 130],
-      [6, 30, 56, 82, 108, 134],
-      [6, 34, 60, 86, 112, 138],
-      [6, 30, 58, 86, 114, 142],
-      [6, 34, 62, 90, 118, 146],
-      [6, 30, 54, 78, 102, 126, 150],
-      [6, 24, 50, 76, 102, 128, 154],
-      [6, 28, 54, 80, 106, 132, 158],
-      [6, 32, 58, 84, 110, 136, 162],
-      [6, 26, 54, 82, 110, 138, 166],
-      [6, 30, 58, 86, 114, 142, 170]
-    ];
-    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
-    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
-    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
-
-    var _this = {};
-
-    var getBCHDigit = function(data) {
-      var digit = 0;
-      while (data != 0) {
-        digit += 1;
-        data >>>= 1;
-      }
-      return digit;
-    };
-
-    _this.getBCHTypeInfo = function(data) {
-      var d = data << 10;
-      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
-        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
-      }
-      return ( (data << 10) | d) ^ G15_MASK;
-    };
-
-    _this.getBCHTypeNumber = function(data) {
-      var d = data << 12;
-      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
-        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
-      }
-      return (data << 12) | d;
-    };
-
-    _this.getPatternPosition = function(typeNumber) {
-      return PATTERN_POSITION_TABLE[typeNumber - 1];
-    };
-
-    _this.getMaskFunction = function(maskPattern) {
-
-      switch (maskPattern) {
-
-      case QRMaskPattern.PATTERN000 :
-        return function(i, j) { return (i + j) % 2 == 0; };
-      case QRMaskPattern.PATTERN001 :
-        return function(i, j) { return i % 2 == 0; };
-      case QRMaskPattern.PATTERN010 :
-        return function(i, j) { return j % 3 == 0; };
-      case QRMaskPattern.PATTERN011 :
-        return function(i, j) { return (i + j) % 3 == 0; };
-      case QRMaskPattern.PATTERN100 :
-        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
-      case QRMaskPattern.PATTERN101 :
-        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
-      case QRMaskPattern.PATTERN110 :
-        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
-      case QRMaskPattern.PATTERN111 :
-        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
-
-      default :
-        throw 'bad maskPattern:' + maskPattern;
-      }
-    };
-
-    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
-      var a = qrPolynomial([1], 0);
-      for (var i = 0; i < errorCorrectLength; i += 1) {
-        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
-      }
-      return a;
-    };
-
-    _this.getLengthInBits = function(mode, type) {
-
-      if (1 <= type && type < 10) {
-
-        // 1 - 9
-
-        switch(mode) {
-        case QRMode.MODE_NUMBER    : return 10;
-        case QRMode.MODE_ALPHA_NUM : return 9;
-        case QRMode.MODE_8BIT_BYTE : return 8;
-        case QRMode.MODE_KANJI     : return 8;
-        default :
-          throw 'mode:' + mode;
-        }
-
-      } else if (type < 27) {
-
-        // 10 - 26
-
-        switch(mode) {
-        case QRMode.MODE_NUMBER    : return 12;
-        case QRMode.MODE_ALPHA_NUM : return 11;
-        case QRMode.MODE_8BIT_BYTE : return 16;
-        case QRMode.MODE_KANJI     : return 10;
-        default :
-          throw 'mode:' + mode;
-        }
-
-      } else if (type < 41) {
-
-        // 27 - 40
-
-        switch(mode) {
-        case QRMode.MODE_NUMBER    : return 14;
-        case QRMode.MODE_ALPHA_NUM : return 13;
-        case QRMode.MODE_8BIT_BYTE : return 16;
-        case QRMode.MODE_KANJI     : return 12;
-        default :
-          throw 'mode:' + mode;
-        }
-
-      } else {
-        throw 'type:' + type;
-      }
-    };
-
-    _this.getLostPoint = function(qrcode) {
-
-      var moduleCount = qrcode.getModuleCount();
-
-      var lostPoint = 0;
-
-      // LEVEL1
-
-      for (var row = 0; row < moduleCount; row += 1) {
-        for (var col = 0; col < moduleCount; col += 1) {
-
-          var sameCount = 0;
-          var dark = qrcode.isDark(row, col);
-
-          for (var r = -1; r <= 1; r += 1) {
-
-            if (row + r < 0 || moduleCount <= row + r) {
-              continue;
-            }
-
-            for (var c = -1; c <= 1; c += 1) {
-
-              if (col + c < 0 || moduleCount <= col + c) {
-                continue;
-              }
-
-              if (r == 0 && c == 0) {
-                continue;
-              }
-
-              if (dark == qrcode.isDark(row + r, col + c) ) {
-                sameCount += 1;
-              }
-            }
-          }
-
-          if (sameCount > 5) {
-            lostPoint += (3 + sameCount - 5);
-          }
-        }
-      };
-
-      // LEVEL2
-
-      for (var row = 0; row < moduleCount - 1; row += 1) {
-        for (var col = 0; col < moduleCount - 1; col += 1) {
-          var count = 0;
-          if (qrcode.isDark(row, col) ) count += 1;
-          if (qrcode.isDark(row + 1, col) ) count += 1;
-          if (qrcode.isDark(row, col + 1) ) count += 1;
-          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
-          if (count == 0 || count == 4) {
-            lostPoint += 3;
-          }
-        }
-      }
-
-      // LEVEL3
-
-      for (var row = 0; row < moduleCount; row += 1) {
-        for (var col = 0; col < moduleCount - 6; col += 1) {
-          if (qrcode.isDark(row, col)
-              && !qrcode.isDark(row, col + 1)
-              &&  qrcode.isDark(row, col + 2)
-              &&  qrcode.isDark(row, col + 3)
-              &&  qrcode.isDark(row, col + 4)
-              && !qrcode.isDark(row, col + 5)
-              &&  qrcode.isDark(row, col + 6) ) {
-            lostPoint += 40;
-          }
-        }
-      }
-
-      for (var col = 0; col < moduleCount; col += 1) {
-        for (var row = 0; row < moduleCount - 6; row += 1) {
-          if (qrcode.isDark(row, col)
-              && !qrcode.isDark(row + 1, col)
-              &&  qrcode.isDark(row + 2, col)
-              &&  qrcode.isDark(row + 3, col)
-              &&  qrcode.isDark(row + 4, col)
-              && !qrcode.isDark(row + 5, col)
-              &&  qrcode.isDark(row + 6, col) ) {
-            lostPoint += 40;
-          }
-        }
-      }
-
-      // LEVEL4
-
-      var darkCount = 0;
-
-      for (var col = 0; col < moduleCount; col += 1) {
-        for (var row = 0; row < moduleCount; row += 1) {
-          if (qrcode.isDark(row, col) ) {
-            darkCount += 1;
-          }
-        }
-      }
-
-      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
-      lostPoint += ratio * 10;
-
-      return lostPoint;
-    };
-
-    return _this;
-  }();
-
-  //---------------------------------------------------------------------
-  // QRMath
-  //---------------------------------------------------------------------
-
-  var QRMath = function() {
-
-    var EXP_TABLE = new Array(256);
-    var LOG_TABLE = new Array(256);
-
-    // initialize tables
-    for (var i = 0; i < 8; i += 1) {
-      EXP_TABLE[i] = 1 << i;
-    }
-    for (var i = 8; i < 256; i += 1) {
-      EXP_TABLE[i] = EXP_TABLE[i - 4]
-        ^ EXP_TABLE[i - 5]
-        ^ EXP_TABLE[i - 6]
-        ^ EXP_TABLE[i - 8];
-    }
-    for (var i = 0; i < 255; i += 1) {
-      LOG_TABLE[EXP_TABLE[i] ] = i;
-    }
-
-    var _this = {};
-
-    _this.glog = function(n) {
-
-      if (n < 1) {
-        throw 'glog(' + n + ')';
-      }
-
-      return LOG_TABLE[n];
-    };
-
-    _this.gexp = function(n) {
-
-      while (n < 0) {
-        n += 255;
-      }
-
-      while (n >= 256) {
-        n -= 255;
-      }
-
-      return EXP_TABLE[n];
-    };
-
-    return _this;
-  }();
-
-  //---------------------------------------------------------------------
-  // qrPolynomial
-  //---------------------------------------------------------------------
-
-  function qrPolynomial(num, shift) {
-
-    if (typeof num.length == 'undefined') {
-      throw num.length + '/' + shift;
-    }
-
-    var _num = function() {
-      var offset = 0;
-      while (offset < num.length && num[offset] == 0) {
-        offset += 1;
-      }
-      var _num = new Array(num.length - offset + shift);
-      for (var i = 0; i < num.length - offset; i += 1) {
-        _num[i] = num[i + offset];
-      }
-      return _num;
-    }();
-
-    var _this = {};
-
-    _this.getAt = function(index) {
-      return _num[index];
-    };
-
-    _this.getLength = function() {
-      return _num.length;
-    };
-
-    _this.multiply = function(e) {
-
-      var num = new Array(_this.getLength() + e.getLength() - 1);
-
-      for (var i = 0; i < _this.getLength(); i += 1) {
-        for (var j = 0; j < e.getLength(); j += 1) {
-          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
-        }
-      }
-
-      return qrPolynomial(num, 0);
-    };
-
-    _this.mod = function(e) {
-
-      if (_this.getLength() - e.getLength() < 0) {
-        return _this;
-      }
-
-      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
-
-      var num = new Array(_this.getLength() );
-      for (var i = 0; i < _this.getLength(); i += 1) {
-        num[i] = _this.getAt(i);
-      }
-
-      for (var i = 0; i < e.getLength(); i += 1) {
-        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
-      }
-
-      // recursive call
-      return qrPolynomial(num, 0).mod(e);
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // QRRSBlock
-  //---------------------------------------------------------------------
-
-  var QRRSBlock = function() {
-
-    var RS_BLOCK_TABLE = [
-
-      // L
-      // M
-      // Q
-      // H
-
-      // 1
-      [1, 26, 19],
-      [1, 26, 16],
-      [1, 26, 13],
-      [1, 26, 9],
-
-      // 2
-      [1, 44, 34],
-      [1, 44, 28],
-      [1, 44, 22],
-      [1, 44, 16],
-
-      // 3
-      [1, 70, 55],
-      [1, 70, 44],
-      [2, 35, 17],
-      [2, 35, 13],
-
-      // 4
-      [1, 100, 80],
-      [2, 50, 32],
-      [2, 50, 24],
-      [4, 25, 9],
-
-      // 5
-      [1, 134, 108],
-      [2, 67, 43],
-      [2, 33, 15, 2, 34, 16],
-      [2, 33, 11, 2, 34, 12],
-
-      // 6
-      [2, 86, 68],
-      [4, 43, 27],
-      [4, 43, 19],
-      [4, 43, 15],
-
-      // 7
-      [2, 98, 78],
-      [4, 49, 31],
-      [2, 32, 14, 4, 33, 15],
-      [4, 39, 13, 1, 40, 14],
-
-      // 8
-      [2, 121, 97],
-      [2, 60, 38, 2, 61, 39],
-      [4, 40, 18, 2, 41, 19],
-      [4, 40, 14, 2, 41, 15],
-
-      // 9
-      [2, 146, 116],
-      [3, 58, 36, 2, 59, 37],
-      [4, 36, 16, 4, 37, 17],
-      [4, 36, 12, 4, 37, 13],
-
-      // 10
-      [2, 86, 68, 2, 87, 69],
-      [4, 69, 43, 1, 70, 44],
-      [6, 43, 19, 2, 44, 20],
-      [6, 43, 15, 2, 44, 16],
-
-      // 11
-      [4, 101, 81],
-      [1, 80, 50, 4, 81, 51],
-      [4, 50, 22, 4, 51, 23],
-      [3, 36, 12, 8, 37, 13],
-
-      // 12
-      [2, 116, 92, 2, 117, 93],
-      [6, 58, 36, 2, 59, 37],
-      [4, 46, 20, 6, 47, 21],
-      [7, 42, 14, 4, 43, 15],
-
-      // 13
-      [4, 133, 107],
-      [8, 59, 37, 1, 60, 38],
-      [8, 44, 20, 4, 45, 21],
-      [12, 33, 11, 4, 34, 12],
-
-      // 14
-      [3, 145, 115, 1, 146, 116],
-      [4, 64, 40, 5, 65, 41],
-      [11, 36, 16, 5, 37, 17],
-      [11, 36, 12, 5, 37, 13],
-
-      // 15
-      [5, 109, 87, 1, 110, 88],
-      [5, 65, 41, 5, 66, 42],
-      [5, 54, 24, 7, 55, 25],
-      [11, 36, 12, 7, 37, 13],
-
-      // 16
-      [5, 122, 98, 1, 123, 99],
-      [7, 73, 45, 3, 74, 46],
-      [15, 43, 19, 2, 44, 20],
-      [3, 45, 15, 13, 46, 16],
-
-      // 17
-      [1, 135, 107, 5, 136, 108],
-      [10, 74, 46, 1, 75, 47],
-      [1, 50, 22, 15, 51, 23],
-      [2, 42, 14, 17, 43, 15],
-
-      // 18
-      [5, 150, 120, 1, 151, 121],
-      [9, 69, 43, 4, 70, 44],
-      [17, 50, 22, 1, 51, 23],
-      [2, 42, 14, 19, 43, 15],
-
-      // 19
-      [3, 141, 113, 4, 142, 114],
-      [3, 70, 44, 11, 71, 45],
-      [17, 47, 21, 4, 48, 22],
-      [9, 39, 13, 16, 40, 14],
-
-      // 20
-      [3, 135, 107, 5, 136, 108],
-      [3, 67, 41, 13, 68, 42],
-      [15, 54, 24, 5, 55, 25],
-      [15, 43, 15, 10, 44, 16],
-
-      // 21
-      [4, 144, 116, 4, 145, 117],
-      [17, 68, 42],
-      [17, 50, 22, 6, 51, 23],
-      [19, 46, 16, 6, 47, 17],
-
-      // 22
-      [2, 139, 111, 7, 140, 112],
-      [17, 74, 46],
-      [7, 54, 24, 16, 55, 25],
-      [34, 37, 13],
-
-      // 23
-      [4, 151, 121, 5, 152, 122],
-      [4, 75, 47, 14, 76, 48],
-      [11, 54, 24, 14, 55, 25],
-      [16, 45, 15, 14, 46, 16],
-
-      // 24
-      [6, 147, 117, 4, 148, 118],
-      [6, 73, 45, 14, 74, 46],
-      [11, 54, 24, 16, 55, 25],
-      [30, 46, 16, 2, 47, 17],
-
-      // 25
-      [8, 132, 106, 4, 133, 107],
-      [8, 75, 47, 13, 76, 48],
-      [7, 54, 24, 22, 55, 25],
-      [22, 45, 15, 13, 46, 16],
-
-      // 26
-      [10, 142, 114, 2, 143, 115],
-      [19, 74, 46, 4, 75, 47],
-      [28, 50, 22, 6, 51, 23],
-      [33, 46, 16, 4, 47, 17],
-
-      // 27
-      [8, 152, 122, 4, 153, 123],
-      [22, 73, 45, 3, 74, 46],
-      [8, 53, 23, 26, 54, 24],
-      [12, 45, 15, 28, 46, 16],
-
-      // 28
-      [3, 147, 117, 10, 148, 118],
-      [3, 73, 45, 23, 74, 46],
-      [4, 54, 24, 31, 55, 25],
-      [11, 45, 15, 31, 46, 16],
-
-      // 29
-      [7, 146, 116, 7, 147, 117],
-      [21, 73, 45, 7, 74, 46],
-      [1, 53, 23, 37, 54, 24],
-      [19, 45, 15, 26, 46, 16],
-
-      // 30
-      [5, 145, 115, 10, 146, 116],
-      [19, 75, 47, 10, 76, 48],
-      [15, 54, 24, 25, 55, 25],
-      [23, 45, 15, 25, 46, 16],
-
-      // 31
-      [13, 145, 115, 3, 146, 116],
-      [2, 74, 46, 29, 75, 47],
-      [42, 54, 24, 1, 55, 25],
-      [23, 45, 15, 28, 46, 16],
-
-      // 32
-      [17, 145, 115],
-      [10, 74, 46, 23, 75, 47],
-      [10, 54, 24, 35, 55, 25],
-      [19, 45, 15, 35, 46, 16],
-
-      // 33
-      [17, 145, 115, 1, 146, 116],
-      [14, 74, 46, 21, 75, 47],
-      [29, 54, 24, 19, 55, 25],
-      [11, 45, 15, 46, 46, 16],
-
-      // 34
-      [13, 145, 115, 6, 146, 116],
-      [14, 74, 46, 23, 75, 47],
-      [44, 54, 24, 7, 55, 25],
-      [59, 46, 16, 1, 47, 17],
-
-      // 35
-      [12, 151, 121, 7, 152, 122],
-      [12, 75, 47, 26, 76, 48],
-      [39, 54, 24, 14, 55, 25],
-      [22, 45, 15, 41, 46, 16],
-
-      // 36
-      [6, 151, 121, 14, 152, 122],
-      [6, 75, 47, 34, 76, 48],
-      [46, 54, 24, 10, 55, 25],
-      [2, 45, 15, 64, 46, 16],
-
-      // 37
-      [17, 152, 122, 4, 153, 123],
-      [29, 74, 46, 14, 75, 47],
-      [49, 54, 24, 10, 55, 25],
-      [24, 45, 15, 46, 46, 16],
-
-      // 38
-      [4, 152, 122, 18, 153, 123],
-      [13, 74, 46, 32, 75, 47],
-      [48, 54, 24, 14, 55, 25],
-      [42, 45, 15, 32, 46, 16],
-
-      // 39
-      [20, 147, 117, 4, 148, 118],
-      [40, 75, 47, 7, 76, 48],
-      [43, 54, 24, 22, 55, 25],
-      [10, 45, 15, 67, 46, 16],
-
-      // 40
-      [19, 148, 118, 6, 149, 119],
-      [18, 75, 47, 31, 76, 48],
-      [34, 54, 24, 34, 55, 25],
-      [20, 45, 15, 61, 46, 16]
-    ];
-
-    var qrRSBlock = function(totalCount, dataCount) {
-      var _this = {};
-      _this.totalCount = totalCount;
-      _this.dataCount = dataCount;
-      return _this;
-    };
-
-    var _this = {};
-
-    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
-
-      switch(errorCorrectionLevel) {
-      case QRErrorCorrectionLevel.L :
-        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
-      case QRErrorCorrectionLevel.M :
-        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
-      case QRErrorCorrectionLevel.Q :
-        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
-      case QRErrorCorrectionLevel.H :
-        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
-      default :
-        return undefined;
-      }
-    };
-
-    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
-
-      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
-
-      if (typeof rsBlock == 'undefined') {
-        throw 'bad rs block @ typeNumber:' + typeNumber +
-            '/errorCorrectionLevel:' + errorCorrectionLevel;
-      }
-
-      var length = rsBlock.length / 3;
-
-      var list = [];
-
-      for (var i = 0; i < length; i += 1) {
-
-        var count = rsBlock[i * 3 + 0];
-        var totalCount = rsBlock[i * 3 + 1];
-        var dataCount = rsBlock[i * 3 + 2];
-
-        for (var j = 0; j < count; j += 1) {
-          list.push(qrRSBlock(totalCount, dataCount) );
-        }
-      }
-
-      return list;
-    };
-
-    return _this;
-  }();
-
-  //---------------------------------------------------------------------
-  // qrBitBuffer
-  //---------------------------------------------------------------------
-
-  var qrBitBuffer = function() {
-
-    var _buffer = [];
-    var _length = 0;
-
-    var _this = {};
-
-    _this.getBuffer = function() {
-      return _buffer;
-    };
-
-    _this.getAt = function(index) {
-      var bufIndex = Math.floor(index / 8);
-      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
-    };
-
-    _this.put = function(num, length) {
-      for (var i = 0; i < length; i += 1) {
-        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
-      }
-    };
-
-    _this.getLengthInBits = function() {
-      return _length;
-    };
-
-    _this.putBit = function(bit) {
-
-      var bufIndex = Math.floor(_length / 8);
-      if (_buffer.length <= bufIndex) {
-        _buffer.push(0);
-      }
-
-      if (bit) {
-        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
-      }
-
-      _length += 1;
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // qrNumber
-  //---------------------------------------------------------------------
-
-  var qrNumber = function(data) {
-
-    var _mode = QRMode.MODE_NUMBER;
-    var _data = data;
-
-    var _this = {};
-
-    _this.getMode = function() {
-      return _mode;
-    };
-
-    _this.getLength = function(buffer) {
-      return _data.length;
-    };
-
-    _this.write = function(buffer) {
-
-      var data = _data;
-
-      var i = 0;
-
-      while (i + 2 < data.length) {
-        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
-        i += 3;
-      }
-
-      if (i < data.length) {
-        if (data.length - i == 1) {
-          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
-        } else if (data.length - i == 2) {
-          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
-        }
-      }
-    };
-
-    var strToNum = function(s) {
-      var num = 0;
-      for (var i = 0; i < s.length; i += 1) {
-        num = num * 10 + chatToNum(s.charAt(i) );
-      }
-      return num;
-    };
-
-    var chatToNum = function(c) {
-      if ('0' <= c && c <= '9') {
-        return c.charCodeAt(0) - '0'.charCodeAt(0);
-      }
-      throw 'illegal char :' + c;
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // qrAlphaNum
-  //---------------------------------------------------------------------
-
-  var qrAlphaNum = function(data) {
-
-    var _mode = QRMode.MODE_ALPHA_NUM;
-    var _data = data;
-
-    var _this = {};
-
-    _this.getMode = function() {
-      return _mode;
-    };
-
-    _this.getLength = function(buffer) {
-      return _data.length;
-    };
-
-    _this.write = function(buffer) {
-
-      var s = _data;
-
-      var i = 0;
-
-      while (i + 1 < s.length) {
-        buffer.put(
-          getCode(s.charAt(i) ) * 45 +
-          getCode(s.charAt(i + 1) ), 11);
-        i += 2;
-      }
-
-      if (i < s.length) {
-        buffer.put(getCode(s.charAt(i) ), 6);
-      }
-    };
-
-    var getCode = function(c) {
-
-      if ('0' <= c && c <= '9') {
-        return c.charCodeAt(0) - '0'.charCodeAt(0);
-      } else if ('A' <= c && c <= 'Z') {
-        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
-      } else {
-        switch (c) {
-        case ' ' : return 36;
-        case '$' : return 37;
-        case '%' : return 38;
-        case '*' : return 39;
-        case '+' : return 40;
-        case '-' : return 41;
-        case '.' : return 42;
-        case '/' : return 43;
-        case ':' : return 44;
-        default :
-          throw 'illegal char :' + c;
-        }
-      }
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // qr8BitByte
-  //---------------------------------------------------------------------
-
-  var qr8BitByte = function(data) {
-
-    var _mode = QRMode.MODE_8BIT_BYTE;
-    var _data = data;
-    var _bytes = qrcode.stringToBytes(data);
-
-    var _this = {};
-
-    _this.getMode = function() {
-      return _mode;
-    };
-
-    _this.getLength = function(buffer) {
-      return _bytes.length;
-    };
-
-    _this.write = function(buffer) {
-      for (var i = 0; i < _bytes.length; i += 1) {
-        buffer.put(_bytes[i], 8);
-      }
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // qrKanji
-  //---------------------------------------------------------------------
-
-  var qrKanji = function(data) {
-
-    var _mode = QRMode.MODE_KANJI;
-    var _data = data;
-
-    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
-    if (!stringToBytes) {
-      throw 'sjis not supported.';
-    }
-    !function(c, code) {
-      // self test for sjis support.
-      var test = stringToBytes(c);
-      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
-        throw 'sjis not supported.';
-      }
-    }('\u53cb', 0x9746);
-
-    var _bytes = stringToBytes(data);
-
-    var _this = {};
-
-    _this.getMode = function() {
-      return _mode;
-    };
-
-    _this.getLength = function(buffer) {
-      return ~~(_bytes.length / 2);
-    };
-
-    _this.write = function(buffer) {
-
-      var data = _bytes;
-
-      var i = 0;
-
-      while (i + 1 < data.length) {
-
-        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
-
-        if (0x8140 <= c && c <= 0x9FFC) {
-          c -= 0x8140;
-        } else if (0xE040 <= c && c <= 0xEBBF) {
-          c -= 0xC140;
-        } else {
-          throw 'illegal char at ' + (i + 1) + '/' + c;
-        }
-
-        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
-
-        buffer.put(c, 13);
-
-        i += 2;
-      }
-
-      if (i < data.length) {
-        throw 'illegal char at ' + (i + 1);
-      }
-    };
-
-    return _this;
-  };
-
-  //=====================================================================
-  // GIF Support etc.
-  //
-
-  //---------------------------------------------------------------------
-  // byteArrayOutputStream
-  //---------------------------------------------------------------------
-
-  var byteArrayOutputStream = function() {
-
-    var _bytes = [];
-
-    var _this = {};
-
-    _this.writeByte = function(b) {
-      _bytes.push(b & 0xff);
-    };
-
-    _this.writeShort = function(i) {
-      _this.writeByte(i);
-      _this.writeByte(i >>> 8);
-    };
-
-    _this.writeBytes = function(b, off, len) {
-      off = off || 0;
-      len = len || b.length;
-      for (var i = 0; i < len; i += 1) {
-        _this.writeByte(b[i + off]);
-      }
-    };
-
-    _this.writeString = function(s) {
-      for (var i = 0; i < s.length; i += 1) {
-        _this.writeByte(s.charCodeAt(i) );
-      }
-    };
-
-    _this.toByteArray = function() {
-      return _bytes;
-    };
-
-    _this.toString = function() {
-      var s = '';
-      s += '[';
-      for (var i = 0; i < _bytes.length; i += 1) {
-        if (i > 0) {
-          s += ',';
-        }
-        s += _bytes[i];
-      }
-      s += ']';
-      return s;
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // base64EncodeOutputStream
-  //---------------------------------------------------------------------
-
-  var base64EncodeOutputStream = function() {
-
-    var _buffer = 0;
-    var _buflen = 0;
-    var _length = 0;
-    var _base64 = '';
-
-    var _this = {};
-
-    var writeEncoded = function(b) {
-      _base64 += String.fromCharCode(encode(b & 0x3f) );
-    };
-
-    var encode = function(n) {
-      if (n < 0) {
-        // error.
-      } else if (n < 26) {
-        return 0x41 + n;
-      } else if (n < 52) {
-        return 0x61 + (n - 26);
-      } else if (n < 62) {
-        return 0x30 + (n - 52);
-      } else if (n == 62) {
-        return 0x2b;
-      } else if (n == 63) {
-        return 0x2f;
-      }
-      throw 'n:' + n;
-    };
-
-    _this.writeByte = function(n) {
-
-      _buffer = (_buffer << 8) | (n & 0xff);
-      _buflen += 8;
-      _length += 1;
-
-      while (_buflen >= 6) {
-        writeEncoded(_buffer >>> (_buflen - 6) );
-        _buflen -= 6;
-      }
-    };
-
-    _this.flush = function() {
-
-      if (_buflen > 0) {
-        writeEncoded(_buffer << (6 - _buflen) );
-        _buffer = 0;
-        _buflen = 0;
-      }
-
-      if (_length % 3 != 0) {
-        // padding
-        var padlen = 3 - _length % 3;
-        for (var i = 0; i < padlen; i += 1) {
-          _base64 += '=';
-        }
-      }
-    };
-
-    _this.toString = function() {
-      return _base64;
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // base64DecodeInputStream
-  //---------------------------------------------------------------------
-
-  var base64DecodeInputStream = function(str) {
-
-    var _str = str;
-    var _pos = 0;
-    var _buffer = 0;
-    var _buflen = 0;
-
-    var _this = {};
-
-    _this.read = function() {
-
-      while (_buflen < 8) {
-
-        if (_pos >= _str.length) {
-          if (_buflen == 0) {
-            return -1;
-          }
-          throw 'unexpected end of file./' + _buflen;
-        }
-
-        var c = _str.charAt(_pos);
-        _pos += 1;
-
-        if (c == '=') {
-          _buflen = 0;
-          return -1;
-        } else if (c.match(/^\s$/) ) {
-          // ignore if whitespace.
-          continue;
-        }
-
-        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
-        _buflen += 6;
-      }
-
-      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
-      _buflen -= 8;
-      return n;
-    };
-
-    var decode = function(c) {
-      if (0x41 <= c && c <= 0x5a) {
-        return c - 0x41;
-      } else if (0x61 <= c && c <= 0x7a) {
-        return c - 0x61 + 26;
-      } else if (0x30 <= c && c <= 0x39) {
-        return c - 0x30 + 52;
-      } else if (c == 0x2b) {
-        return 62;
-      } else if (c == 0x2f) {
-        return 63;
-      } else {
-        throw 'c:' + c;
-      }
-    };
-
-    return _this;
-  };
-
-  //---------------------------------------------------------------------
-  // gifImage (B/W)
-  //---------------------------------------------------------------------
-
-  var gifImage = function(width, height) {
-
-    var _width = width;
-    var _height = height;
-    var _data = new Array(width * height);
-
-    var _this = {};
-
-    _this.setPixel = function(x, y, pixel) {
-      _data[y * _width + x] = pixel;
-    };
-
-    _this.write = function(out) {
-
-      //---------------------------------
-      // GIF Signature
-
-      out.writeString('GIF87a');
-
-      //---------------------------------
-      // Screen Descriptor
-
-      out.writeShort(_width);
-      out.writeShort(_height);
-
-      out.writeByte(0x80); // 2bit
-      out.writeByte(0);
-      out.writeByte(0);
-
-      //---------------------------------
-      // Global Color Map
-
-      // black
-      out.writeByte(0x00);
-      out.writeByte(0x00);
-      out.writeByte(0x00);
-
-      // white
-      out.writeByte(0xff);
-      out.writeByte(0xff);
-      out.writeByte(0xff);
-
-      //---------------------------------
-      // Image Descriptor
-
-      out.writeString(',');
-      out.writeShort(0);
-      out.writeShort(0);
-      out.writeShort(_width);
-      out.writeShort(_height);
-      out.writeByte(0);
-
-      //---------------------------------
-      // Local Color Map
-
-      //---------------------------------
-      // Raster Data
-
-      var lzwMinCodeSize = 2;
-      var raster = getLZWRaster(lzwMinCodeSize);
-
-      out.writeByte(lzwMinCodeSize);
-
-      var offset = 0;
-
-      while (raster.length - offset > 255) {
-        out.writeByte(255);
-        out.writeBytes(raster, offset, 255);
-        offset += 255;
-      }
-
-      out.writeByte(raster.length - offset);
-      out.writeBytes(raster, offset, raster.length - offset);
-      out.writeByte(0x00);
-
-      //---------------------------------
-      // GIF Terminator
-      out.writeString(';');
-    };
-
-    var bitOutputStream = function(out) {
-
-      var _out = out;
-      var _bitLength = 0;
-      var _bitBuffer = 0;
-
-      var _this = {};
-
-      _this.write = function(data, length) {
-
-        if ( (data >>> length) != 0) {
-          throw 'length over';
-        }
-
-        while (_bitLength + length >= 8) {
-          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
-          length -= (8 - _bitLength);
-          data >>>= (8 - _bitLength);
-          _bitBuffer = 0;
-          _bitLength = 0;
-        }
-
-        _bitBuffer = (data << _bitLength) | _bitBuffer;
-        _bitLength = _bitLength + length;
-      };
-
-      _this.flush = function() {
-        if (_bitLength > 0) {
-          _out.writeByte(_bitBuffer);
-        }
-      };
-
-      return _this;
-    };
-
-    var getLZWRaster = function(lzwMinCodeSize) {
-
-      var clearCode = 1 << lzwMinCodeSize;
-      var endCode = (1 << lzwMinCodeSize) + 1;
-      var bitLength = lzwMinCodeSize + 1;
-
-      // Setup LZWTable
-      var table = lzwTable();
-
-      for (var i = 0; i < clearCode; i += 1) {
-        table.add(String.fromCharCode(i) );
-      }
-      table.add(String.fromCharCode(clearCode) );
-      table.add(String.fromCharCode(endCode) );
-
-      var byteOut = byteArrayOutputStream();
-      var bitOut = bitOutputStream(byteOut);
-
-      // clear code
-      bitOut.write(clearCode, bitLength);
-
-      var dataIndex = 0;
-
-      var s = String.fromCharCode(_data[dataIndex]);
-      dataIndex += 1;
-
-      while (dataIndex < _data.length) {
-
-        var c = String.fromCharCode(_data[dataIndex]);
-        dataIndex += 1;
-
-        if (table.contains(s + c) ) {
-
-          s = s + c;
-
-        } else {
-
-          bitOut.write(table.indexOf(s), bitLength);
-
-          if (table.size() < 0xfff) {
-
-            if (table.size() == (1 << bitLength) ) {
-              bitLength += 1;
-            }
-
-            table.add(s + c);
-          }
-
-          s = c;
-        }
-      }
-
-      bitOut.write(table.indexOf(s), bitLength);
-
-      // end code
-      bitOut.write(endCode, bitLength);
-
-      bitOut.flush();
-
-      return byteOut.toByteArray();
-    };
-
-    var lzwTable = function() {
-
-      var _map = {};
-      var _size = 0;
-
-      var _this = {};
-
-      _this.add = function(key) {
-        if (_this.contains(key) ) {
-          throw 'dup key:' + key;
-        }
-        _map[key] = _size;
-        _size += 1;
-      };
-
-      _this.size = function() {
-        return _size;
-      };
-
-      _this.indexOf = function(key) {
-        return _map[key];
-      };
-
-      _this.contains = function(key) {
-        return typeof _map[key] != 'undefined';
-      };
-
-      return _this;
-    };
-
-    return _this;
-  };
-
-  var createDataURL = function(width, height, getPixel) {
-    var gif = gifImage(width, height);
-    for (var y = 0; y < height; y += 1) {
-      for (var x = 0; x < width; x += 1) {
-        gif.setPixel(x, y, getPixel(x, y) );
-      }
-    }
-
-    var b = byteArrayOutputStream();
-    gif.write(b);
-
-    var base64 = base64EncodeOutputStream();
-    var bytes = b.toByteArray();
-    for (var i = 0; i < bytes.length; i += 1) {
-      base64.writeByte(bytes[i]);
-    }
-    base64.flush();
-
-    return 'data:image/gif;base64,' + base64;
-  };
-
-  //---------------------------------------------------------------------
-  // returns qrcode function.
-
-  return qrcode;
-}();
-
-// multibyte support
-!function() {
-
-  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
-    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
-    function toUTF8Array(str) {
-      var utf8 = [];
-      for (var i=0; i < str.length; i++) {
-        var charcode = str.charCodeAt(i);
-        if (charcode < 0x80) utf8.push(charcode);
-        else if (charcode < 0x800) {
-          utf8.push(0xc0 | (charcode >> 6),
-              0x80 | (charcode & 0x3f));
-        }
-        else if (charcode < 0xd800 || charcode >= 0xe000) {
-          utf8.push(0xe0 | (charcode >> 12),
-              0x80 | ((charcode>>6) & 0x3f),
-              0x80 | (charcode & 0x3f));
-        }
-        // surrogate pair
-        else {
-          i++;
-          // UTF-16 encodes 0x10000-0x10FFFF by
-          // subtracting 0x10000 and splitting the
-          // 20 bits of 0x0-0xFFFFF into two halves
-          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
-            | (str.charCodeAt(i) & 0x3ff));
-          utf8.push(0xf0 | (charcode >>18),
-              0x80 | ((charcode>>12) & 0x3f),
-              0x80 | ((charcode>>6) & 0x3f),
-              0x80 | (charcode & 0x3f));
-        }
-      }
-      return utf8;
-    }
-    return toUTF8Array(s);
-  };
-
-}();
-
-(function (factory) {
-  if (typeof define === 'function' && define.amd) {
-      define([], factory);
-  } else if (typeof exports === 'object') {
-      module.exports = factory();
-  }
-}(function () {
-    return qrcode;
-}));
-
-</script>
-<script>
 /* =====================================================================
-   설정값 — 보고서 내용 기반. 실제 운영 전 좌표·문구는 반드시 재검증할 것.
+   설정값 — 보고서 내용 기반. 실제 운영 전 문구·경품 배분은 반드시 재검증할 것.
    ===================================================================== */
 const CONFIG = {
   eventName: "가을 보령생태로드",
@@ -2515,87 +290,120 @@ const CONFIG = {
   target: "만 14세 이상 누구나",
   host: "해양환경공단 · 보령시",
 
-  // ⚠ 응모 접수 메일을 받을 담당자 주소 (Apps Script 쪽 ADMIN_EMAIL과 별개로,
-  // 웹앱 연동 실패 시 수동 메일 보내기 버튼에 쓰입니다)
   adminEmail: "whiteoks@koem.or.kr",
-
-  // ⚠ 구글 Apps Script 웹앱 URL. 배포 후 이 값을 채우면 '제출' 시
-  // 자동으로 시트 기록 + 담당자 메일 발송이 됩니다. 비워두면 수동 메일 방식으로 동작합니다.
   webAppUrl: "https://script.google.com/macros/s/AKfycbzQDGGVexkWFreR89-M8mfnCvsbXVPeDRGp7HbVFfOwb7PdXos9lVpSUyrIMDnzQBJl/exec",
 
-  // ⚠ 좌표는 보고서에 명시되어 있지 않아 공개 정보 기반 추정치입니다.
-  // 실제 서비스 전 반드시 담당자가 현장 실측 좌표로 교체해야 합니다.
+  // ⚠ 좌표는 공개 정보 기반 추정치. 관리자 테스트 모드에서 현장 실측 후 갱신 권장.
   stations: [
     {
       id: "sohwang",
-      name: "소황사구",
+      name: "소황사구 해양보호구역",
       tag: "생태·경관 보전지역",
       desc: "국내 유일의 해안사구이자 국내 첫 번째 해양경관보호구역(2018.12 지정)입니다.",
-      lat: 36.2795, lng: 126.4735, radiusM: 900
+      photoHint: "현장 안내판(소황사구 표지판)이 잘 보이도록 촬영해주세요.",
+      lat: 36.2795, lng: 126.4735, radiusM: 200
     },
     {
       id: "dakbyeoseul",
-      name: "무창포 닭벼슬섬",
+      name: "무창포해수욕장",
       tag: "갯벌생태계 복원지역",
       desc: "연륙교 제거·교량화를 통해 해수 유통과 침·퇴적현상을 개선한 갯벌 생태계 복원사업 현장입니다(2021.12 완료).",
-      lat: 36.2975, lng: 126.4890, radiusM: 500
+      photoHint: "현장 안내판(닭벼슬섬 표지판)이 잘 보이도록 촬영해주세요.",
+      lat: 36.2975, lng: 126.4890, radiusM: 200
     },
     {
       id: "gunheon",
-      name: "군헌어촌체험마을",
+      name: "군헌어촌체험휴양마을",
       tag: "낙조·어촌생태 체험지역",
-      desc: "공단 자매결연 어촌마을로, 2025년 취식공간 개선을 위한 푸드트럭 지원 등 상생협력을 이어가고 있습니다.",
-      lat: 36.3695, lng: 126.5285, radiusM: 400
+      desc: "충남 보령시 오천면의 갯벌체험 휴양마을. 서해 갯벌과 어촌 정취를 즐길 수 있습니다.",
+      photoHint: "현장 안내판(군헌어촌체험마을 표지판)이 잘 보이도록 촬영해주세요.",
+      lat: 36.3695, lng: 126.5285, radiusM: 200
     }
   ],
 
-  // 보고서 [대상자 선정방법] 기준 경품 구성
   gifts: [
     { icon: "🎟️", name: "보령사랑상품권 1만원권", desc: "스탬프 투어 참여자 대상 선착순 200명" },
     { icon: "🍜", name: "군헌마을 2만원 이용권", desc: "사진 인증·SNS 홍보 참여자 대상 추첨 60명" },
     { icon: "🌾", name: "만세보령 쌀 4kg", desc: "사진 인증·SNS 홍보 참여자 대상 추첨 40명" }
+  ],
+
+  consents: [
+    {
+      id: "privacy",
+      label: "[필수] 개인정보 수집·이용 동의",
+      detail: "수집 항목: 이름, 휴대폰번호, 이메일, 방문 인증 사진 · 목적: 스탬프 투어 응모 및 상품권 지급 안내 · 보유기간: 행사 종료 후 지급 완료 시까지(이후 파기). 동의를 거부할 수 있으나, 거부 시 스탬프 투어 참여가 제한됩니다."
+    },
+    {
+      id: "notice",
+      label: "[필수] 이벤트 유의사항 동의",
+      detail: "본 이벤트는 예산 소진 시 조기 종료될 수 있습니다. 허위 위치·사진 인증이 확인될 경우 응모가 취소될 수 있습니다. 경품은 선착순/추첨 결과에 따라 개별 안내됩니다."
+    },
+    {
+      id: "photo",
+      label: "[필수] 사진 수집·이용 동의",
+      detail: "방문 인증을 위해 촬영한 사진은 이벤트 진행 및 결과 확인 목적으로만 사용되며, 사전 동의 없이 홍보 등 다른 목적으로 사용되지 않습니다."
+    }
   ]
 };
 
 /* =====================================================================
-   상태 관리 — window.storage에 개인 진행상황만 저장(비공개, shared:false)
+   상태 관리
    ===================================================================== */
 let state = {
   loaded:false,
   testMode:false,
-  visited:{},        // {stationId: isoTimestamp}
-  gpsStatus:{},       // {stationId: {loading, message, warn}}
-  entry:null,         // {name, phone, entryNo, submittedAt}
-  autoSubmit:null,     // null | 'sending' | 'sent' | 'failed' | 'not-configured'
-  confirmingReset:false
+
+  step:"consent",        // 'consent' | 'location' | 'done' | 'lookup'
+  returnStep:"consent",   // lookup에서 뒤로가기 시 돌아갈 단계
+
+  identity:{
+    name:"", phone:"", email:"",
+    codeSent:false, sending:false,
+    code:"", verifying:false, verified:false,
+    error:""
+  },
+  consents:{ privacy:false, notice:false, photo:false },
+  expandedConsent:{},
+
+  modalStation:null,      // 인증 모달이 열려있는 station id
+
+  photos:{},
+  visited:{},
+  gpsStatus:{},
+
+  entry:null,             // { entryNo, submittedAt, seqNo, firstComeText }
+  autoSubmit:null,
+
+  confirmingReset:false,
+
+  lookup:{ name:"", phone:"", searching:false, result:null, error:"", notFound:false }
 };
 
-const STORAGE_KEY = "boryeong-stamp-progress-v1";
+const STORAGE_KEY = "boryeong-stamp-progress-v4";
 let memoryFallback = {};
 
-/* Claude 아티팩트(window.storage) → 일반 브라우저(localStorage) → 메모리
-   순서로 자동 폴백. GitHub Pages 등 외부 호스팅에서도 그대로 동작합니다. */
+/* Claude 아티팩트(window.storage) → 일반 브라우저(localStorage) → 메모리 순 자동 폴백 */
 async function storageGet(key){
   if(typeof window !== "undefined" && window.storage && typeof window.storage.get === "function"){
     try{
       const res = await window.storage.get(key, false);
       if(res && typeof res.value !== "undefined") return res.value;
-    }catch(e){ /* 값 없음 또는 미지원 - 다음 방식 시도 */ }
+    }catch(e){}
   }
   try{
     const v = localStorage.getItem(key);
     if(v !== null) return v;
-  }catch(e){ /* localStorage 미지원(프라이빗 모드 등) */ }
+  }catch(e){}
   return memoryFallback[key] || null;
 }
 
 async function storageSet(key, value){
   let saved = false;
   if(typeof window !== "undefined" && window.storage && typeof window.storage.set === "function"){
-    try{ await window.storage.set(key, value, false); saved = true; }catch(e){ /* 다음 방식 시도 */ }
+    try{ await window.storage.set(key, value, false); saved = true; }catch(e){}
   }
   if(!saved){
-    try{ localStorage.setItem(key, value); saved = true; }catch(e){ /* 다음 방식 시도 */ }
+    try{ localStorage.setItem(key, value); saved = true; }catch(e){}
   }
   if(!saved){ memoryFallback[key] = value; }
 }
@@ -2605,22 +413,196 @@ async function loadState(){
     const raw = await storageGet(STORAGE_KEY);
     if(raw){
       const saved = JSON.parse(raw);
+      state.step = saved.step || "consent";
+      state.identity = Object.assign(state.identity, saved.identity || {});
+      state.consents = Object.assign(state.consents, saved.consents || {});
+      state.photos = saved.photos || {};
       state.visited = saved.visited || {};
       state.entry = saved.entry || null;
     }
-  }catch(e){ /* 저장된 값 없음 - 최초 방문 */ }
+  }catch(e){}
   state.loaded = true;
   render();
 }
 
 async function persist(){
   try{
-    await storageSet(STORAGE_KEY, JSON.stringify({visited:state.visited, entry:state.entry}));
+    await storageSet(STORAGE_KEY, JSON.stringify({
+      step: state.step,
+      identity: state.identity,
+      consents: state.consents,
+      photos: state.photos,
+      visited: state.visited,
+      entry: state.entry
+    }));
   }catch(e){ console.error("저장 실패", e); }
 }
 
+function esc(s){ const d=document.createElement("div"); d.textContent=String(s==null?"":s); return d.innerHTML; }
+
 /* =====================================================================
-   위치 인증 로직
+   백엔드 통신
+   ===================================================================== */
+async function callBackend(action, payload){
+  const url = (CONFIG.webAppUrl || "").trim();
+  if(!url) return { ok:false, message:"webAppUrl이 설정되지 않았어요." };
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(Object.assign({ action }, payload))
+  });
+  return await res.json();
+}
+
+/* =====================================================================
+   본인 확인 (이메일 인증)
+   ===================================================================== */
+function validateIdentityInputs(){
+  const { name, phone, email } = state.identity;
+  if(!name.trim()){ state.identity.error = "성명을 입력해 주세요."; return false; }
+  if(!phone.trim()){ state.identity.error = "휴대전화번호를 입력해 주세요."; return false; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){ state.identity.error = "올바른 이메일 주소를 입력해 주세요."; return false; }
+  return true;
+}
+
+async function requestCode(){
+  state.identity.error = "";
+  if(!validateIdentityInputs()){ render(); return; }
+
+  state.identity.sending = true;
+  render();
+
+  try{
+    const res = await callBackend("requestCode", {
+      name: state.identity.name.trim(),
+      phone: state.identity.phone.trim(),
+      email: state.identity.email.trim()
+    });
+    if(res.duplicate){
+      state.identity.error = "이미 접수하신 내역이 있어요. 같은 분은 중복 참여가 어려워요.";
+    }else if(res.ok){
+      state.identity.codeSent = true;
+    }else{
+      state.identity.error = res.message || "인증번호 발송에 실패했어요. 잠시 후 다시 시도해주세요.";
+    }
+  }catch(e){
+    state.identity.error = "네트워크 오류로 인증번호를 보내지 못했어요.";
+  }
+  state.identity.sending = false;
+  persist();
+  render();
+}
+
+async function verifyCode(){
+  const codeInput = document.getElementById("otpInput");
+  const code = codeInput ? codeInput.value.trim() : state.identity.code;
+  state.identity.code = code;
+
+  if(!code){ state.identity.error = "인증번호를 입력해 주세요."; render(); return; }
+
+  state.identity.verifying = true;
+  state.identity.error = "";
+  render();
+
+  try{
+    const res = await callBackend("verifyCode", {
+      email: state.identity.email.trim(),
+      code: code
+    });
+    if(res.ok){
+      state.identity.verified = true;
+    }else{
+      state.identity.error = res.message || "인증번호가 올바르지 않거나 만료됐어요.";
+    }
+  }catch(e){
+    state.identity.error = "네트워크 오류로 인증에 실패했어요.";
+  }
+  state.identity.verifying = false;
+  persist();
+  render();
+}
+
+function testAutoVerify(){
+  if(!validateIdentityInputs()){ render(); return; }
+  state.identity.codeSent = true;
+  state.identity.verified = true;
+  state.identity.error = "";
+  persist();
+  render();
+}
+
+function updateIdentityField(field, value){
+  state.identity[field] = value;
+}
+
+function toggleConsentItem(id){
+  state.consents[id] = !state.consents[id];
+  render();
+}
+
+function toggleExpandConsent(id){
+  state.expandedConsent[id] = !state.expandedConsent[id];
+  render();
+}
+
+function allConsentsChecked(){
+  return CONFIG.consents.every(c => !!state.consents[c.id]);
+}
+
+function startTour(){
+  if(!state.identity.verified || !allConsentsChecked()) return;
+  state.step = "location";
+  persist();
+  render();
+}
+
+/* =====================================================================
+   응모 내역 조회
+   ===================================================================== */
+function openLookup(fromStep){
+  state.returnStep = fromStep || state.step;
+  state.step = "lookup";
+  state.lookup = { name:"", phone:"", searching:false, result:null, error:"", notFound:false };
+  render();
+}
+
+function closeLookup(){
+  state.step = state.returnStep;
+  render();
+}
+
+async function checkExisting(){
+  const nameInput = document.getElementById("lookupName");
+  const phoneInput = document.getElementById("lookupPhone");
+  const name = nameInput ? nameInput.value.trim() : "";
+  const phone = phoneInput ? phoneInput.value.trim() : "";
+
+  if(!phone){ state.lookup.error = "휴대전화번호를 입력해 주세요."; render(); return; }
+
+  state.lookup.name = name;
+  state.lookup.phone = phone;
+  state.lookup.searching = true;
+  state.lookup.error = "";
+  state.lookup.result = null;
+  state.lookup.notFound = false;
+  render();
+
+  try{
+    const res = await callBackend("checkStatus", { query: phone, name });
+    if(res.found){
+      state.lookup.result = res;
+    }else{
+      state.lookup.notFound = true;
+    }
+  }catch(e){
+    state.lookup.error = "조회 중 오류가 발생했어요.";
+  }
+  state.lookup.searching = false;
+  render();
+}
+
+/* =====================================================================
+   장소 인증 (GPS 방문 인증 + 현장 안내판 사진) - 모달 방식
    ===================================================================== */
 function haversineM(lat1, lon1, lat2, lon2){
   const R = 6371000;
@@ -2629,6 +611,16 @@ function haversineM(lat1, lon1, lat2, lon2){
   const dLon = toRad(lon2 - lon1);
   const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function openStationModal(stationId){
+  state.modalStation = stationId;
+  render();
+}
+
+function closeStationModal(){
+  state.modalStation = null;
+  render();
 }
 
 function checkIn(stationId){
@@ -2648,10 +640,10 @@ function checkIn(stationId){
       const dist = Math.round(haversineM(pos.coords.latitude, pos.coords.longitude, station.lat, station.lng));
       if(dist <= station.radiusM){
         state.visited[stationId] = new Date().toISOString();
-        state.gpsStatus[stationId] = {message:`인증 완료! (거리 약 ${dist}m)`};
+        state.gpsStatus[stationId] = {message:`방문 인증 완료! (약 ${dist}m)`};
         persist();
       }else{
-        state.gpsStatus[stationId] = {message:`현재 위치에서 약 ${dist.toLocaleString()}m 떨어져 있어요. 반경 ${station.radiusM}m 이내에서 다시 시도해 주세요.`, warn:true};
+        state.gpsStatus[stationId] = {message:`반경 ${station.radiusM}m 밖이에요 (현재 약 ${dist.toLocaleString()}m 떨어짐)`, warn:true};
       }
       render();
     },
@@ -2668,27 +660,189 @@ function checkIn(stationId){
 
 function testCheckIn(stationId){
   state.visited[stationId] = new Date().toISOString();
-  state.gpsStatus[stationId] = {message:"테스트 모드로 인증되었습니다."};
+  state.gpsStatus[stationId] = {message:"테스트 모드로 위치인증 되었습니다."};
   persist();
   render();
 }
 
+function triggerPhotoCapture(stationId){
+  const input = document.getElementById("photoInput-" + stationId);
+  if(input) input.click();
+}
+
+function handlePhotoSelect(event, stationId){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const MAX_W = 1280;
+      const scale = Math.min(1, MAX_W / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+      const base64 = dataUrl.split(",")[1];
+
+      state.photos[stationId] = { dataUrl, base64, mimeType: "image/jpeg" };
+      persist();
+      render();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function retakePhoto(stationId){
+  delete state.photos[stationId];
+  persist();
+  render();
+}
+
+function testSkipPhoto(stationId){
+  state.photos[stationId] = { dataUrl:"", base64:"", mimeType:"image/jpeg", skipped:true };
+  persist();
+  render();
+}
+
+function isStationDone(stationId){
+  return !!state.visited[stationId]; // 방문(GPS) 인증만 필수, 사진은 선택사항
+}
+
+function allStationsReady(){
+  return CONFIG.stations.every(s => isStationDone(s.id));
+}
+
+function submitLocationStep(){
+  if(!allStationsReady()) return;
+  finalSubmit();
+}
+
+/* =====================================================================
+   지도 (Leaflet + OpenStreetMap, API 키 불필요) - 3곳을 한 지도에 표시
+   ===================================================================== */
+let leafletMapInstance = null;
+
+function initStationsMap(){
+  const mapEl = document.getElementById("stationsMap");
+  if(!mapEl || typeof L === "undefined") return;
+
+  if(leafletMapInstance){
+    leafletMapInstance.remove();
+    leafletMapInstance = null;
+  }
+
+  leafletMapInstance = L.map("stationsMap", { zoomControl:true, scrollWheelZoom:false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(leafletMapInstance);
+
+  const markers = CONFIG.stations.map(s => {
+    const done = isStationDone(s.id);
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="width:26px;height:26px;border-radius:50%;background:${done?'#C2410C':'#D97706'};border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);"></div>`,
+      iconSize:[26,26], iconAnchor:[13,13]
+    });
+    return L.marker([s.lat, s.lng], { icon }).addTo(leafletMapInstance).bindPopup(esc(s.name));
+  });
+
+  const group = L.featureGroup(markers);
+  const bounds = group.getBounds();
+  if(bounds.isValid()){
+    leafletMapInstance.fitBounds(bounds.pad(0.35));
+  }else{
+    leafletMapInstance.setView([CONFIG.stations[0].lat, CONFIG.stations[0].lng], 12);
+  }
+}
+
+/* =====================================================================
+   접수 완료 / 최종 제출
+   ===================================================================== */
+function getVisitedNamesList(){
+  return CONFIG.stations.map(s => s.name);
+}
+
+function buildMailtoLink(entry){
+  const visitedNames = getVisitedNamesList().map(s => `- ${s}`).join("\n");
+  const subject = `[가을 보령생태로드] 스탬프투어 응모 - ${state.identity.name}`;
+  const body =
+`가을 보령생태로드 모바일 스탬프 투어 응모 접수 (자동전송 실패로 수동 발송)
+
+응모번호 : ${entry.entryNo}
+성명     : ${state.identity.name}
+연락처   : ${state.identity.phone}
+이메일   : ${state.identity.email}
+제출시각 : ${new Date(entry.submittedAt).toLocaleString('ko-KR')}
+
+[방문 인증 내역]
+${visitedNames}
+
+※ 사진 파일은 이 메일에 자동 첨부되지 않았습니다.
+`;
+  const to = (CONFIG.adminEmail || "").trim();
+  return `mailto:${encodeURIComponent(to).replace(/%40/g,'@')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+async function finalSubmit(){
+  const entryNo = "BR" + Date.now().toString().slice(-8);
+  const submittedAt = new Date().toISOString();
+  state.entry = { entryNo, submittedAt };
+  state.step = "done";
+  state.autoSubmit = "sending";
+  persist();
+  render();
+
+  const photosPayload = CONFIG.stations.map(s => {
+    const p = state.photos[s.id] || {};
+    return { stationId: s.id, stationName: s.name, base64: p.base64 || "", mimeType: p.mimeType || "image/jpeg", skipped: !!p.skipped };
+  });
+
+  try{
+    const res = await callBackend("submitEntry", {
+      name: state.identity.name.trim(),
+      phone: state.identity.phone.trim(),
+      email: state.identity.email.trim(),
+      entryNo,
+      submittedAt: new Date(submittedAt).toLocaleString('ko-KR'),
+      visitedStations: getVisitedNamesList(),
+      photos: photosPayload
+    });
+    state.autoSubmit = res.ok ? "sent" : "failed";
+    if(res.ok){
+      state.entry.seqNo = res.seqNo || null;
+      state.entry.firstComeText = res.firstComeText || "";
+    }
+  }catch(e){
+    state.autoSubmit = "failed";
+  }
+  persist();
+  render();
+}
+
+/* =====================================================================
+   테스트 모드 / 초기화
+   ===================================================================== */
 function toggleTestMode(){
   state.testMode = !state.testMode;
   render();
 }
 
-function askResetProgress(){
-  state.confirmingReset = true;
-  render();
-}
-
-function cancelResetProgress(){
-  state.confirmingReset = false;
-  render();
-}
+function askResetProgress(){ state.confirmingReset = true; render(); }
+function cancelResetProgress(){ state.confirmingReset = false; render(); }
 
 function resetProgress(){
+  state.step = "consent";
+  state.identity = { name:"", phone:"", email:"", codeSent:false, sending:false, code:"", verifying:false, verified:false, error:"" };
+  state.consents = { privacy:false, notice:false, photo:false };
+  state.expandedConsent = {};
+  state.modalStation = null;
+  state.photos = {};
   state.visited = {};
   state.gpsStatus = {};
   state.entry = null;
@@ -2699,321 +853,330 @@ function resetProgress(){
 }
 
 /* =====================================================================
-   응모 로직
-   - 로컬(window.storage)에는 진행상황 확인용으로만 최소 보관합니다.
-   - 담당자 접수는 mailto: 링크로 사용자의 메일 앱을 열어 전달합니다.
-     (정적 페이지 특성상 서버 없이는 "발송 버튼 클릭 한 번"이 아니라
-      메일 앱이 열린 뒤 참가자가 '보내기'를 눌러야 최종 전송됩니다.
-      완전 자동 전송이 필요하면 별도 백엔드/이메일 서비스 연동이 필요합니다.)
-   ===================================================================== */
-function getVisitedNamesList(){
-  return CONFIG.stations
-    .filter(s => state.visited[s.id])
-    .map(s => `${s.name} (${new Date(state.visited[s.id]).toLocaleString('ko-KR')})`);
-}
-
-function buildMailtoLink(entry){
-  const visitedNames = getVisitedNamesList().map(s => `- ${s}`).join("\n");
-
-  const subject = `[가을 보령생태로드] 스탬프투어 응모 - ${entry.name}`;
-  const body =
-`가을 보령생태로드 모바일 스탬프 투어 응모 접수
-
-응모번호 : ${entry.entryNo}
-성명     : ${entry.name}
-연락처   : ${entry.phone}
-제출시각 : ${new Date(entry.submittedAt).toLocaleString('ko-KR')}
-
-[방문 인증 내역]
-${visitedNames}
-`;
-
-  const to = (CONFIG.adminEmail || "").trim();
-  return `mailto:${encodeURIComponent(to).replace(/%40/g,'@')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
-// Apps Script 웹앱으로 자동 제출. 성공/실패 여부를 state.autoSubmit에 기록해 화면에 반영합니다.
-function trySubmitToWebApp(entry){
-  const url = (CONFIG.webAppUrl || "").trim();
-  if(!url){
-    state.autoSubmit = "not-configured";
-    render();
-    return;
-  }
-  state.autoSubmit = "sending";
-  render();
-
-  fetch(url, {
-    method: "POST",
-    mode: "no-cors", // Apps Script 웹앱은 CORS 응답을 안 주는 경우가 많아 no-cors로 전송(응답은 못 읽지만 전송은 됨)
-    headers: { "Content-Type": "text/plain;charset=utf-8" }, // application/json으로 하면 preflight에서 막히는 경우가 있어 text/plain 사용
-    body: JSON.stringify({
-      entryNo: entry.entryNo,
-      name: entry.name,
-      phone: entry.phone,
-      submittedAt: new Date(entry.submittedAt).toLocaleString('ko-KR'),
-      visitedStations: getVisitedNamesList()
-    })
-  }).then(() => {
-    state.autoSubmit = "sent"; // no-cors라 실제 성공여부까진 못 읽지만, 네트워크 에러가 없으면 대체로 정상 처리됨
-    render();
-  }).catch(() => {
-    state.autoSubmit = "failed";
-    render();
-  });
-}
-
-function submitEntry(name, phone, consent){
-  if(!name.trim() || !phone.trim() || !consent) return;
-  const entryNo = "BR" + Date.now().toString().slice(-8);
-  const entry = { name: name.trim(), phone: phone.trim(), entryNo, submittedAt: new Date().toISOString() };
-  state.entry = entry;
-  persist();
-  trySubmitToWebApp(entry);
-}
-
-/* =====================================================================
    렌더링
    ===================================================================== */
-function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
-
 function render(){
   const app = document.getElementById("app");
   if(!state.loaded){
-    app.innerHTML = `<div style="padding:60px 20px;text-align:center;color:#4B5B5C;font-size:13px;">불러오는 중...</div>`;
+    app.innerHTML = `<div style="padding:60px 20px;text-align:center;color:#8A6F55;font-size:13px;">불러오는 중...</div>`;
     return;
   }
 
-  const doneCount = CONFIG.stations.filter(s => state.visited[s.id]).length;
-  const allDone = doneCount === CONFIG.stations.length;
-  const fillPct = CONFIG.stations.length <= 1 ? 0 : (doneCount-1 <= 0 ? 0 : ((doneCount-1)/(CONFIG.stations.length-1))*100);
-
   app.innerHTML = `
+    ${renderHeader()}
+    ${state.step === "consent" ? renderConsentStep() : ""}
+    ${state.step === "location" ? renderLocationStep() : ""}
+    ${state.step === "done" ? renderDoneStep() : ""}
+    ${state.step === "lookup" ? renderLookupStep() : ""}
+    ${state.modalStation ? renderStationModal() : ""}
+    ${state.step !== "lookup" ? `
+      <div class="footer-note">
+        <b>주최</b> ${CONFIG.host} · <b>기간</b> ${CONFIG.period}<br>
+        <span class="warn-line">※ ${CONFIG.periodNote}</span>
+      </div>
+    ` : ""}
+  `;
+
+  if(state.step === "location" || state.modalStation){
+    CONFIG.stations.forEach(station => {
+      const input = document.getElementById("photoInput-" + station.id);
+      if(input){
+        input.onchange = (e) => handlePhotoSelect(e, station.id);
+      }
+    });
+  }
+
+  if(state.step === "location"){
+    if(typeof L !== "undefined"){
+      initStationsMap();
+    }else{
+      window.addEventListener("load", () => { if(state.step === "location") render(); }, { once:true });
+    }
+  }
+}
+
+function renderHeader(){
+  const doneCount = CONFIG.stations.filter(s => isStationDone(s.id)).length;
+  const showCounter = state.step === "location" || state.step === "done";
+  return `
     <div class="hero">
       <div class="top-row">
-        <div class="brand">해양환경공단 × 보령시</div>
-        <div class="test-toggle" onclick="toggleTestMode()">
-          담당자 테스트 모드
-          <div class="switch ${state.testMode?'on':''}"><div class="knob"></div></div>
+        <div class="brand">보령시 <span class="x">×</span> 해양환경공단</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${showCounter ? `<span class="badge" style="background:rgba(255,255,255,.22);">${doneCount}/${CONFIG.stations.length} 인증</span>` : ""}
+          <div class="test-toggle" onclick="toggleTestMode()">
+            테스트
+            <div class="switch ${state.testMode?'on':''}"><div class="knob"></div></div>
+          </div>
         </div>
       </div>
-      <h1>${CONFIG.eventName}<br><em>${CONFIG.eventSub}</em></h1>
-      <p class="sub">보령시 해양보호구역·갯벌복원지·어촌마을을 직접 걸으며 스탬프를 모으고, 가을 보령 바다의 이야기를 만나보세요.</p>
-      <div class="badge-row">
-        <span class="badge">📅 ${CONFIG.period}</span>
-        <span class="badge">👤 ${CONFIG.target}</span>
-        <span class="badge">📍 총 3개소</span>
-      </div>
-    </div>
-
-    <div class="passport">
-      <div class="passport-title">
-        <h2>나의 스탬프 여정</h2>
-        <span class="passport-count">${doneCount} / ${CONFIG.stations.length}</span>
-      </div>
-      <div class="trail">
-        <div class="trail-line"></div>
-        <div class="trail-line-fill" style="width:${fillPct}%"></div>
-        ${CONFIG.stations.map(s => `
-          <div class="stop ${state.visited[s.id] ? 'done':''}" onclick="document.getElementById('card-${s.id}').scrollIntoView({behavior:'smooth',block:'center'})">
-            <div class="stop-dot">${state.visited[s.id] ? '✓' : ''}</div>
-            <div class="stop-label">${s.name}</div>
-          </div>
-        `).join("")}
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <div class="eyebrow">Step 1 · 현장 방문</div>
-        <h3>3개 장소를 방문하고 인증하세요</h3>
-        <p>각 장소에서 반경 내에 도착하면 '위치로 인증하기' 버튼으로 스탬프를 받을 수 있어요.</p>
-      </div>
-      ${CONFIG.stations.map((s,i) => renderStation(s,i)).join("")}
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <div class="eyebrow">Step 2 · 리워드</div>
-        <h3>완주하면 받을 수 있어요</h3>
-      </div>
-      <div class="reward-tiers">
-        ${CONFIG.gifts.map(g => `
-          <div class="tier">
-            <div class="ico">${g.icon}</div>
-            <div><h5>${g.name}</h5><p>${g.desc}</p></div>
-          </div>
-        `).join("")}
-      </div>
-
-      ${renderEntryCard(allDone)}
-    </div>
-
-    ${state.testMode ? renderQrAdmin() : ''}
-
-    <div class="footer-note">
-      <b>주최</b> ${CONFIG.host} · <b>기간</b> ${CONFIG.period}<br>
-      <span class="warn-line">※ ${CONFIG.periodNote}</span><br>
-      본 페이지는 기획 검토용 초안(프로토타입)입니다. 실제 좌표·경품 배분 방식·개인정보 처리 절차는 운영 전 확정이 필요합니다.
+      ${state.step === "consent" ? `
+        <h1>${CONFIG.eventName}<br><em>${CONFIG.eventSub}</em></h1>
+        <p class="sub">가을, 보령의 세 곳을 걸으며 스탬프를 모으세요.</p>
+        <div class="badge-row">
+          <span class="badge">📅 ${CONFIG.period}</span>
+          <span class="badge">👤 ${CONFIG.target}</span>
+        </div>
+      ` : ""}
     </div>
   `;
 }
 
-function renderQrAdmin(){
+function renderConsentStep(){
+  const id = state.identity;
+
   return `
+    <div class="wizard-card">
+      <div class="step-num-row">
+        <div class="step-num-card"><span class="num">1</span> 3개 관광지를 방문하고</div>
+        <div class="step-num-card"><span class="num">2</span> '방문 인증'과 '사진 인증'을 하면</div>
+        <div class="step-num-card"><span class="num">3</span> 3곳 완주 시 자동 응모 → 선착순 상품권</div>
+      </div>
+
+      <h2 style="margin-top:18px;">참여자 정보</h2>
+      <div class="field">
+        <label>이름</label>
+        <input type="text" value="${esc(id.name)}" placeholder="홍길동" ${id.codeSent?'disabled':''}
+          oninput="updateIdentityField('name', this.value)">
+      </div>
+      <div class="field">
+        <label>휴대폰 번호</label>
+        <input type="tel" value="${esc(id.phone)}" placeholder="010-0000-0000" ${id.codeSent?'disabled':''}
+          oninput="updateIdentityField('phone', this.value)">
+        <div class="hint-text">휴대폰 1개당 이메일 1개만 인증할 수 있어요.</div>
+      </div>
+      <div class="field">
+        <label>이메일 (인증 필요)</label>
+        <div class="otp-row">
+          <input type="email" value="${esc(id.email)}" placeholder="you@example.com" ${id.codeSent?'disabled':''}
+            oninput="updateIdentityField('email', this.value)">
+          ${!id.codeSent ? `<button class="gps-btn" style="width:auto;" onclick="requestCode()" ${id.sending?'disabled':''}>${id.sending?'발송중':'인증번호 받기'}</button>` : ""}
+        </div>
+      </div>
+
+      ${id.error ? `<div class="gps-feedback warn" style="margin:8px 0;">${esc(id.error)}</div>` : ""}
+
+      ${id.codeSent && !id.verified ? `
+        <div class="field" style="margin-top:10px;">
+          <label>인증번호 (6자리)</label>
+          <div class="otp-row">
+            <input type="text" inputmode="numeric" maxlength="6" id="otpInput" placeholder="123456" value="${esc(id.code)}">
+            <button class="gps-btn" style="width:auto;" onclick="verifyCode()" ${id.verifying?'disabled':''}>${id.verifying?'확인중':'인증하기'}</button>
+          </div>
+        </div>
+        <button class="link-btn" style="margin-top:8px;" onclick="requestCode()">인증번호 다시 받기</button>
+      ` : ""}
+
+      ${id.verified ? `<div class="success-box" style="margin-top:12px;">✔ 이메일 인증 완료</div>` : ""}
+
+      ${state.testMode && !id.verified ? `<button class="test-btn" style="margin-top:12px;" onclick="testAutoVerify()">🧪 이메일 인증 건너뛰기 (테스트)</button>` : ""}
+
+      <div class="modal-divider"></div>
+
+      <h3 style="font-size:14px;color:var(--tide-teal-dark);margin:0 0 10px;">약관 동의 <span style="font-size:11px;font-weight:500;color:var(--ink-soft);">— 항목을 누르면 내용이 펼쳐집니다</span></h3>
+
+      ${CONFIG.consents.map(c => `
+        <div class="consent-item">
+          <label>
+            <input type="checkbox" ${state.consents[c.id]?'checked':''} onclick="toggleConsentItem('${c.id}')">
+            <span>${esc(c.label)}</span>
+            <span class="chev" onclick="event.preventDefault();toggleExpandConsent('${c.id}')">${state.expandedConsent[c.id]?'▲':'▼'}</span>
+          </label>
+          ${state.expandedConsent[c.id] ? `<div class="consent-detail">${esc(c.detail)}</div>` : ""}
+        </div>
+      `).join("")}
+
+      <button class="gps-btn" style="margin-top:16px;" onclick="startTour()" ${(id.verified && allConsentsChecked())?'':'disabled'}>동의하고 시작하기</button>
+      ${!id.verified ? `<div class="hint-text" style="text-align:center;margin-top:8px;">이메일 인증을 완료해야 시작할 수 있어요.</div>` : ""}
+
+      <div style="text-align:center;margin-top:14px;">
+        <button class="link-btn" onclick="openLookup('consent')">이미 참여했어요 — 응모 조회</button>
+      </div>
+
+      <div class="disclosure-text">
+        수집 항목: 이름, 휴대폰번호, 이메일, 방문 인증 사진 · 목적: 스탬프 투어 응모 및 상품권 지급 안내 ·
+        보유기간: 행사 종료 후 지급 완료 시까지(이후 파기). 수집 정보는 운영자 이메일(${esc(CONFIG.adminEmail)})로 접수됩니다.
+      </div>
+    </div>
+  `;
+}
+
+function renderLocationStep(){
+  const doneCount = CONFIG.stations.filter(s => isStationDone(s.id)).length;
+
+  return `
+    <div id="stationsMap"></div>
+
     <div class="section">
       <div class="section-head">
-        <div class="eyebrow">담당자 전용</div>
-        <h3>테스트 도구</h3>
-        <p>스탬프 진행상황·응모 내역을 초기화하고 처음부터 다시 테스트할 수 있어요.</p>
+        <h3 style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span>스탬프 (${doneCount}/${CONFIG.stations.length})</span>
+          <span style="font-size:11.5px;font-weight:500;color:var(--ink-soft);">반경 200m 방문 인증 (사진 첨부는 선택)</span>
+        </h3>
       </div>
-      <div class="station" style="margin-bottom:14px;">
+
+      ${CONFIG.stations.map(station => {
+        const photo = state.photos[station.id];
+        const visited = !!state.visited[station.id];
+        const done = visited; // 방문 인증만 필수, 사진은 선택
+        return `
+          <div class="station-row ${done?'done':''}" onclick="openStationModal('${station.id}')">
+            <div class="ring ${done?'done':''}">${done?'✓':''}</div>
+            <div class="station-row-info">
+              <h4>${esc(station.name)}</h4>
+              <div class="badge-row-sm">
+                <span class="mini-pill ${visited?'ok':''}">${visited?'방문완료':'방문 대기'}</span>
+                <span class="mini-pill ${photo?'ok':''}">${photo?'사진 첨부됨':'사진 선택안함'}</span>
+              </div>
+            </div>
+            <button class="pill-btn" onclick="event.stopPropagation();openStationModal('${station.id}')">${done?'완료':'인증하기'}</button>
+          </div>
+        `;
+      }).join("")}
+
+      <button class="gps-btn" style="margin-top:16px;" onclick="submitLocationStep()" ${allStationsReady()?'':'disabled'}>
+        접수 완료하기
+      </button>
+
+      ${state.testMode ? `<div style="text-align:center;margin-top:14px;"><span class="test-pill">테스트 모드 ON</span></div>` : ""}
+    </div>
+  `;
+}
+
+function renderStationModal(){
+  const station = CONFIG.stations.find(s => s.id === state.modalStation);
+  if(!station) return "";
+  const photo = state.photos[station.id];
+  const visited = !!state.visited[station.id];
+  const status = state.gpsStatus[station.id] || {};
+
+  return `
+    <div class="modal-backdrop" onclick="closeStationModal()">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-head">
+          <h3>${esc(station.name)}</h3>
+          <span class="modal-close" onclick="closeStationModal()">✕</span>
+        </div>
+        <p class="lead">${esc(station.desc)}</p>
+
+        <div class="modal-section">
+          <div class="modal-section-title">1. 방문 인증 (위치)</div>
+          ${visited ? `
+            <div class="success-box">✔ 방문 인증 완료</div>
+          ` : `
+            <p class="hint-text">이 관광지 반경 ${station.radiusM}m 안에서 눌러 주세요.</p>
+            <button class="gps-btn" onclick="checkIn('${station.id}')" ${status.loading?'disabled':''}>${status.loading?'위치 확인 중...':'방문 인증하기'}</button>
+            ${status.message ? `<div class="gps-feedback ${status.warn?'warn':''}">${esc(status.message)}</div>` : ""}
+            ${state.testMode ? `<button class="test-btn" onclick="testCheckIn('${station.id}')">🧪 GPS 없이 인증 (테스트)</button>` : ""}
+          `}
+        </div>
+
+        <div class="modal-divider"></div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">2. 사진 첨부 <span style="font-weight:500;color:var(--ink-soft);">(선택)</span></div>
+          <p class="hint-text">방문 인증만으로도 완주 처리돼요. 사진을 남기고 싶다면 첨부해주세요 (선택).</p>
+
+          <input type="file" accept="image/*" capture="environment" id="photoInput-${station.id}" style="display:none;">
+
+          ${photo ? `
+            <div class="photo-frame filled">
+              ${photo.skipped ? `<div style="padding:20px;text-align:center;">🧪 테스트로 건너뜀</div>` : `<img src="${photo.dataUrl}" alt="${esc(station.name)} 인증사진">`}
+              <button class="retake-btn" onclick="event.stopPropagation();retakePhoto('${station.id}')">다시 찍기</button>
+            </div>
+          ` : `
+            <button class="gps-btn-outline" onclick="triggerPhotoCapture('${station.id}')">📷 사진 첨부하기 (선택)</button>
+          `}
+        </div>
+
+        ${visited ? `<button class="gps-btn" style="margin-top:14px;" onclick="closeStationModal()">닫기</button>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function renderDoneStep(){
+  const entry = state.entry || {};
+  let statusMsg = "";
+
+  if(state.autoSubmit === "sending"){
+    statusMsg = "접수 처리 중이에요...";
+  }else if(state.autoSubmit === "sent"){
+    statusMsg = "세 곳의 스탬프를 모두 모았습니다. 참여해 주셔서 감사합니다.";
+  }else if(state.autoSubmit === "failed"){
+    statusMsg = "⚠ 자동 접수 중 오류가 발생했어요. 아래 버튼으로 메일을 직접 보내주세요.";
+  }
+
+  return `
+    <div class="wizard-card" style="text-align:center;">
+      <div class="done-check">✓</div>
+      <h2>응모가 완료되었어요!</h2>
+      <p class="lead">${statusMsg}</p>
+
+      <div class="success-box" style="margin-top:8px;">
+        <div>응모번호</div>
+        <div class="no">${esc(entry.entryNo || "")}</div>
+        ${entry.seqNo ? `<p>${esc(entry.firstComeText || "")} · 선착순 ${esc(entry.seqNo)}번째 응모</p>` : ""}
+      </div>
+
+      ${state.autoSubmit === "sent" ? `
+        <div class="info-box">응모 정보와 첨부 사진이 운영자 이메일(${esc(CONFIG.adminEmail)})로 접수됩니다.</div>
+      ` : ""}
+      ${state.autoSubmit === "failed" ? `
+        <button class="submit-btn" style="margin-top:12px;" onclick="window.location.href='${buildMailtoLink(entry)}'">담당자에게 메일 보내기</button>
+      ` : ""}
+
+      <p class="hint-text" style="margin-top:14px;">이 화면은 언제든 <b>응모 조회</b>에서 다시 확인할 수 있어요.</p>
+      <button class="gps-btn-outline" onclick="openLookup('done')">응모 내역 조회</button>
+
+      <div style="margin-top:18px;">
         ${state.confirmingReset ? `
-          <div class="gps-feedback warn" style="margin-bottom:10px;">정말 초기화할까요? 스탬프 진행상황과 응모 내역이 모두 지워져요 (이 기기에서만).</div>
+          <div class="gps-feedback warn" style="margin-bottom:8px;">정말 초기화할까요? 모든 진행상황이 지워져요.</div>
           <div style="display:flex;gap:8px;">
             <button class="gps-btn" style="background:var(--sunset);flex:1;" onclick="resetProgress()">예, 초기화</button>
             <button class="gps-btn" style="background:var(--sand-deep);color:var(--ink);flex:1;" onclick="cancelResetProgress()">아니오</button>
           </div>
         ` : `
-          <button class="gps-btn" style="background:var(--sunset);" onclick="askResetProgress()">🔄 진행상황 전체 초기화</button>
+          <button class="link-btn" onclick="askResetProgress()">처음부터 (테스트 초기화)</button>
         `}
       </div>
-
-      <div class="section-head">
-        <h3>접속 QR 코드 생성</h3>
-        <p>이 페이지가 배포될 최종 URL을 입력하면 바로 접속되는 QR 코드를 만들 수 있어요. (아직 URL이 없다면 임시로 아무 값이나 넣고 미리보기만 확인해도 됩니다)</p>
-      </div>
-      <div class="station">
-        <div class="field" style="margin-bottom:10px;">
-          <label style="color:var(--ink-soft);">배포 URL</label>
-          <input type="text" id="qrUrlInput" placeholder="https://example.com/boryeong-stamp-tour"
-            style="width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);font-size:13.5px;background:var(--sand);color:var(--ink);">
-        </div>
-        <button class="gps-btn" onclick="generateQr()">QR 코드 생성</button>
-        <div id="qrResult" style="margin-top:14px;text-align:center;"></div>
-      </div>
     </div>
   `;
 }
 
-function generateQr(){
-  const input = document.getElementById("qrUrlInput");
-  const url = (input.value || "").trim();
-  const resultEl = document.getElementById("qrResult");
-  if(!url){ resultEl.innerHTML = `<div class="gps-feedback warn">URL을 입력해 주세요.</div>`; return; }
-
-  try{
-    const qr = qrcode(0, 'M');
-    qr.addData(url);
-    qr.make();
-    const svg = qr.createSvgTag({cellSize:6, margin:2});
-    const dataUrl = qr.createDataURL(6, 2);
-    resultEl.innerHTML = `
-      <div style="display:inline-block;background:#fff;padding:12px;border-radius:12px;">${svg}</div>
-      <div style="margin-top:10px;">
-        <a href="${dataUrl}" download="boryeong-stamp-tour-qr.png" class="submit-btn" style="display:inline-block;text-decoration:none;padding:10px 18px;">PNG 다운로드</a>
-      </div>
-      <div class="gps-feedback" style="margin-top:8px;">연결 주소: ${esc(url)}</div>
-    `;
-  }catch(e){
-    resultEl.innerHTML = `<div class="gps-feedback warn">QR 생성 중 오류가 발생했어요: ${esc(e.message)}</div>`;
-  }
-}
-
-function renderStation(s, idx){
-  const done = !!state.visited[s.id];
-  const status = state.gpsStatus[s.id] || {};
+function renderLookupStep(){
+  const lk = state.lookup;
   return `
-    <div class="station ${done?'done':''}" id="card-${s.id}">
-      <div class="station-top">
-        <div class="station-num">${String(idx+1).padStart(2,'0')}</div>
-        <div class="station-info">
-          <h4>${s.name}</h4>
-          <div class="tag">${s.tag}</div>
-          <p>${s.desc}</p>
-        </div>
-        <div class="status-pill">${done ? '인증완료':'미방문'}</div>
+    <div class="wizard-card">
+      <h2>응모 내역 조회</h2>
+      <p class="lead">참여 시 입력한 이름과 휴대폰 번호로 진행 상황을 확인합니다.</p>
+
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="lookupName" value="${esc(lk.name)}" placeholder="홍길동">
       </div>
-      <button class="gps-btn ${done?'done':''}" ${done?'disabled':''} onclick="checkIn('${s.id}')">
-        ${done ? '✓ 인증 완료' : (status.loading ? '위치 확인 중...' : '📍 현재 위치로 인증하기')}
-      </button>
-      ${state.testMode && !done ? `<button class="test-btn" onclick="testCheckIn('${s.id}')">🧪 GPS 없이 테스트 인증 (담당자용)</button>` : ''}
-      ${status.message ? `<div class="gps-feedback ${status.warn?'warn':''}">${status.message}</div>` : ''}
-    </div>
-  `;
-}
+      <div class="field">
+        <label>휴대폰 번호</label>
+        <input type="tel" id="lookupPhone" value="${esc(lk.phone)}" placeholder="010-1234-5678">
+      </div>
 
-function renderEntryCard(allDone){
-  if(state.entry){
-    let statusMsg = "";
-    let showManualMailBtn = false;
+      <button class="gps-btn" onclick="checkExisting()" ${lk.searching?'disabled':''}>${lk.searching?'조회 중...':'조회하기'}</button>
 
-    if(state.autoSubmit === "sending"){
-      statusMsg = "접수 처리 중이에요...";
-    } else if(state.autoSubmit === "sent"){
-      statusMsg = "담당자에게 자동으로 접수되었어요. 추첨 결과는 개별 안내드릴 예정입니다.";
-    } else if(state.autoSubmit === "failed"){
-      statusMsg = "⚠ 자동 접수 중 오류가 발생했어요. 아래 버튼으로 메일을 직접 보내주세요.";
-      showManualMailBtn = true;
-    } else if(state.autoSubmit === "not-configured"){
-      statusMsg = "메일 앱이 열리면 '보내기'를 눌러야 담당자에게 최종 접수돼요.";
-      showManualMailBtn = true;
-    }
-
-    return `
-      <div class="entry-card">
-        <h4>🎉 응모가 완료되었어요</h4>
-        <p class="desc">${statusMsg}</p>
-        <div class="success-box">
+      ${lk.error ? `<div class="gps-feedback warn" style="margin-top:10px;">${esc(lk.error)}</div>` : ""}
+      ${lk.notFound ? `<div class="gps-feedback warn" style="margin-top:10px;">접수 내역을 찾을 수 없어요.</div>` : ""}
+      ${lk.result ? `
+        <div class="success-box" style="margin-top:12px;">
           <div>응모번호</div>
-          <div class="no">${state.entry.entryNo}</div>
-          <p>${esc(state.entry.name)}님, 참여해 주셔서 감사합니다.</p>
+          <div class="no">${esc(lk.result.entryNo)}</div>
+          <p>접수시각: ${esc(lk.result.submittedAt)}</p>
         </div>
-        ${showManualMailBtn ? `<button class="submit-btn" style="margin-top:12px;" onclick="window.location.href='${buildMailtoLink(state.entry)}'">담당자에게 메일 보내기</button>` : ''}
-      </div>
-    `;
-  }
+      ` : ""}
 
-  if(!allDone){
-    return `
-      <div class="entry-card locked">
-        <h4>🔒 경품 응모</h4>
-        <p class="desc">3개소 스탬프를 모두 모으면 경품 응모가 열려요.</p>
-        <div class="lock-msg">아직 ${CONFIG.stations.length - CONFIG.stations.filter(s=>state.visited[s.id]).length}곳 남았어요</div>
+      <div style="text-align:center;margin-top:16px;">
+        <button class="link-btn" onclick="closeLookup()">뒤로</button>
       </div>
-    `;
-  }
-
-  const webAppReady = !!(CONFIG.webAppUrl || "").trim();
-  return `
-    <div class="entry-card" id="entryForm">
-      <h4>🎉 완주를 축하합니다!</h4>
-      <p class="desc">아래 정보를 입력하고 경품 추첨에 응모하세요.</p>
-      <div class="field">
-        <label>성명</label>
-        <input type="text" id="entryName" placeholder="홍길동">
-      </div>
-      <div class="field">
-        <label>휴대전화번호</label>
-        <input type="tel" id="entryPhone" placeholder="010-0000-0000">
-      </div>
-      <label class="consent">
-        <input type="checkbox" id="entryConsent">
-        경품 추첨 및 안내를 위한 개인정보(성명, 휴대전화번호) 수집·이용에 동의합니다.
-      </label>
-      <button class="submit-btn" onclick="handleSubmit()">제출</button>
-      ${!webAppReady ? `<div class="gps-feedback warn" style="margin-top:10px;">⚠ 관리자용 안내: CONFIG.webAppUrl이 비어 있어 수동 메일(mailto) 방식으로만 동작합니다.</div>` : ''}
     </div>
   `;
-}
-
-function handleSubmit(){
-  const name = document.getElementById("entryName").value;
-  const phone = document.getElementById("entryPhone").value;
-  const consent = document.getElementById("entryConsent").checked;
-  if(!name.trim() || !phone.trim()){ alert("이름과 연락처를 입력해 주세요."); return; }
-  if(!consent){ alert("개인정보 수집·이용에 동의해 주세요."); return; }
-  submitEntry(name, phone, consent);
 }
 
 render();
@@ -3021,3 +1184,4 @@ loadState();
 </script>
 </body>
 </html>
+
