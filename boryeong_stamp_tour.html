@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>가을 보령생태로드 · 모바일 스탬프 투어</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- =====================================================================
+     카카오톡/문자 등 링크 공유 시 미리보기 카드에 사용되는 태그입니다.
+     og:url, og:image는 실제 배포 주소로 반드시 교체해야 합니다.
+     (예: https://jtaechul.github.io/저장소이름/boryeong_stamp_tour.html)
+     og:image는 함께 드린 og-image.png를 같은 저장소에 올린 뒤,
+     그 파일의 공개 URL을 넣어주세요.
+     ===================================================================== -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="가을 보령생태로드 · 모바일 스탬프 투어">
+<meta property="og:description" content="소황사구·무창포 닭벼슬섬·군헌어촌체험마을, 3곳을 걸으며 스탬프를 모으는 보령시 가을 생태관광 이벤트. 완주하면 보령사랑상품권 등 경품 응모!">
+<meta property="og:image" content="https://whiteoks1111-del.github.io/stamptour/og-image.png">
+<meta property="og:url" content="https://whiteoks1111-del.github.io/stamptour/boryeong_stamp_tour.html">
+<meta name="description" content="소황사구·무창포 닭벼슬섬·군헌어촌체험마을, 3곳을 걸으며 스탬프를 모으는 보령시 가을 생태관광 이벤트">
+
+<style>
+  :root{
+    --tide-teal:#C2410C;      /* 주 브랜드 컬러 - 단풍 테라코타 */
+    --tide-teal-dark:#7C2D12;
+    --sunset:#D97706;         /* 포인트 - 은행나무 골드 */
+    --sunset-light:#FBBF24;
+    --sand:#FFF8EC;           /* 배경 - 따뜻한 아이보리 */
+    --sand-deep:#F5E4C8;
+    --ink:#3B2A1E;            /* 텍스트 - 짙은 밤색 */
+    --ink-soft:#8A6F55;
+    --mint:#F5DFA0;           /* 완료 상태 - 은행잎 골드 */
+    --line:#E9D8B8;
+    --white:#FFFFFF;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --shadow:0 8px 24px rgba(194,65,12,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    background:var(--sand);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--sand);position:relative;padding-bottom:48px;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(165deg,var(--tide-teal) 0%,var(--tide-teal-dark) 100%);
+    color:var(--white);
+    padding:20px 20px 30px;
+    border-radius:0 0 28px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; right:-40px; bottom:-60px; width:200px; height:200px;
+    background:radial-gradient(circle,var(--sunset) 0%,transparent 70%);
+    opacity:.35;
+  }
+  .top-row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;}
+  .brand{font-size:14.5px;letter-spacing:.03em;color:rgba(255,255,255,.92);font-weight:700;display:flex;align-items:center;gap:6px;}
+  .brand .x{color:var(--sunset-light);font-weight:800;font-size:13.5px;}
+  .test-toggle{display:flex;align-items:center;gap:6px;font-size:12.5px;color:rgba(255,255,255,.75);}
+  .switch{width:34px;height:19px;border-radius:20px;background:rgba(255,255,255,.25);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
+  .switch.on{background:var(--sunset);}
+  .switch .knob{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.2s;}
+  .switch.on .knob{left:17px;}
+
+  .hero h1{
+    font-size:31.5px;margin:18px 0 4px;font-weight:800;letter-spacing:-.02em;line-height:1.25;position:relative;z-index:1;
+  }
+  .hero h1 em{font-style:normal;color:var(--sunset-light);}
+  .hero p.sub{margin:0 0 16px;font-size:15.5px;color:rgba(255,255,255,.8);line-height:1.6;position:relative;z-index:1;}
+  .badge-row{display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:1;}
+  .badge{
+    font-size:13px;padding:6px 10px;border-radius:20px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.2);color:#fff;
+  }
+
+  /* ---------- PASSPORT PROGRESS ---------- */
+  .passport{
+    margin:-20px 16px 0;background:var(--white);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);padding:18px 16px 16px;position:relative;z-index:2;
+  }
+  .passport-title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+  .passport-title h2{font-size:16px;margin:0;color:var(--tide-teal-dark);font-weight:700;}
+  .passport-count{font-size:14.5px;font-weight:800;color:var(--sunset);}
+  .trail{display:flex;align-items:center;justify-content:space-between;position:relative;}
+  .trail-line{position:absolute;top:20px;left:36px;right:36px;height:3px;background:var(--line);border-radius:2px;z-index:0;}
+  .trail-line-fill{position:absolute;top:20px;left:36px;height:3px;background:var(--sunset);border-radius:2px;z-index:1;transition:width .3s;}
+  .stop{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:2;cursor:pointer;}
+  .stop-dot{
+    width:40px;height:40px;border-radius:50%;background:var(--white);border:2.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:19px;transition:.25s;
+  }
+  .stop.done .stop-dot{border-color:var(--sunset);background:var(--sunset);color:#fff;}
+  .stop-label{font-size:12px;margin-top:6px;color:var(--ink-soft);text-align:center;font-weight:600;max-width:70px;line-height:1.3;}
+  .stop.done .stop-label{color:var(--tide-teal-dark);}
+
+  /* ---------- SECTION ---------- */
+  .section{padding:26px 20px 0;}
+  .section-head{margin-bottom:12px;}
+  .section-head .eyebrow{font-size:12.5px;letter-spacing:.08em;color:var(--sunset);font-weight:700;text-transform:uppercase;}
+  .section-head h3{font-size:20.5px;margin:4px 0 0;font-weight:800;color:var(--tide-teal-dark);}
+  .section-head p{font-size:14.5px;color:var(--ink-soft);margin:6px 0 0;line-height:1.6;}
+
+  /* ---------- STATION CARD ---------- */
+  .station{
+    background:var(--white);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;
+    box-shadow:var(--shadow);border:1px solid rgba(15,82,87,.06);
+  }
+  .station-top{display:flex;gap:12px;align-items:flex-start;}
+  .station-num{
+    width:30px;height:30px;border-radius:9px;background:var(--sand-deep);color:var(--tide-teal-dark);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14.5px;flex-shrink:0;
+  }
+  .station.done .station-num{background:var(--tide-teal);color:#fff;}
+  .station-info{flex:1;min-width:0;}
+  .station-info h4{margin:0;font-size:17.5px;font-weight:800;color:var(--ink);}
+  .station-info .tag{font-size:13px;color:var(--sunset);font-weight:700;margin-top:2px;}
+  .station-info p{font-size:14px;color:var(--ink-soft);line-height:1.6;margin:8px 0 0;}
+  .status-pill{
+    font-size:12px;font-weight:700;padding:4px 9px;border-radius:20px;flex-shrink:0;
+    background:var(--sand-deep);color:var(--ink-soft);white-space:nowrap;
+  }
+  .station.done .status-pill{background:var(--mint);color:var(--tide-teal-dark);}
+
+  .gps-btn{
+    width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;
+    background:var(--tide-teal);color:#fff;font-size:15.5px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;
+  }
+  .gps-btn:active{transform:scale(.98);}
+  .gps-btn.done{background:var(--mint);color:var(--tide-teal-dark);}
+  .gps-btn:disabled{opacity:.55;}
+  .gps-feedback{font-size:13px;color:var(--ink-soft);margin-top:8px;text-align:center;line-height:1.5;}
+  .gps-feedback.warn{color:var(--sunset);font-weight:600;}
+  .test-btn{
+    width:100%;margin-top:8px;padding:9px;border:1px dashed var(--sunset);border-radius:10px;
+    background:#FFF6F0;color:var(--sunset);font-size:13px;font-weight:700;cursor:pointer;
+  }
+
+  /* ---------- REWARD ---------- */
+  .reward-tiers{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+  .tier{
+    background:var(--white);border-radius:var(--radius-md);padding:14px;box-shadow:var(--shadow);
+    display:flex;gap:12px;align-items:center;border:1px solid rgba(15,82,87,.06);
+  }
+  .tier .ico{
+    width:42px;height:42px;border-radius:12px;background:var(--sand-deep);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:21.5px;
+  }
+  .tier h5{margin:0;font-size:15.5px;font-weight:800;color:var(--ink);}
+  .tier p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);line-height:1.5;}
+
+  .entry-card{
+    background:var(--tide-teal-dark);border-radius:var(--radius-lg);padding:20px;margin-top:16px;color:#fff;
+  }
+  .entry-card.locked{background:var(--sand-deep);color:var(--ink-soft);}
+  .entry-card h4{margin:0 0 4px;font-size:17px;font-weight:800;}
+  .entry-card p.desc{font-size:13.5px;margin:0 0 16px;line-height:1.6;opacity:.85;}
+  .entry-card.locked p.desc{opacity:1;}
+  .field{margin-bottom:10px;}
+  .field label{font-size:13px;font-weight:700;display:block;margin-bottom:5px;opacity:.9;}
+  .field input{
+    width:100%;padding:11px 12px;border-radius:10px;border:none;font-size:16px;
+    background:rgba(255,255,255,.12);color:#fff;outline:none;
+  }
+  .field input::placeholder{color:rgba(255,255,255,.5);}
+  .entry-card.locked .field input{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .consent{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.5;margin:12px 0;opacity:.85;}
+  .consent input{margin-top:2px;}
+  .submit-btn{
+    width:100%;padding:13px;border:none;border-radius:12px;background:var(--sunset);color:#fff;
+    font-size:16px;font-weight:800;cursor:pointer;
+  }
+  .submit-btn:disabled{background:rgba(255,255,255,.15);color:rgba(255,255,255,.4);cursor:not-allowed;}
+  .lock-msg{font-size:14px;text-align:center;padding:10px;font-weight:600;}
+
+  .success-box{
+    background:var(--mint);border-radius:var(--radius-md);padding:16px;text-align:center;margin-top:16px;
+  }
+  .success-box .no{font-size:22.5px;font-weight:900;color:var(--tide-teal-dark);letter-spacing:.03em;margin:6px 0;}
+  .success-box p{margin:0;font-size:13px;color:var(--tide-teal-dark);line-height:1.6;}
+
+  .footer-note{
+    margin:28px 20px 0;padding:16px;border-radius:var(--radius-md);background:var(--sand-deep);
+    font-size:12.5px;color:var(--ink-soft);line-height:1.7;
+  }
+  .footer-note b{color:var(--tide-teal-dark);}
+  .footer-note .warn-line{color:var(--sunset);font-weight:700;}
+
+  ::selection{background:var(--sunset-light);}
+/* ---------- WIZARD STEPS ---------- */
+.step-dots{display:flex;justify-content:center;gap:8px;margin:14px 0 6px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.2s;}
+.step-dot.active{background:var(--sunset);width:22px;border-radius:5px;}
+.step-dot.done{background:var(--tide-teal);}
+.wizard-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px 18px;margin:16px;border:1px solid rgba(15,82,87,.06);}
+.wizard-card h2{margin:0 0 6px;font-size:21.5px;font-weight:800;color:var(--tide-teal-dark);}
+.wizard-card p.lead{font-size:14px;color:var(--ink-soft);line-height:1.6;margin:0 0 18px;}
+.otp-row{display:flex;gap:8px;}
+.otp-row input{flex:1;}
+.otp-row button{width:auto;flex-shrink:0;padding:0 16px;margin:0;}
+.photo-frame{
+  border:2px dashed var(--line);border-radius:14px;aspect-ratio:4/3;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:8px;color:var(--ink-soft);font-size:14px;
+  background:var(--sand);overflow:hidden;position:relative;cursor:pointer;
+}
+.photo-frame img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.photo-frame .cam-icon{font-size:34px;}
+.photo-frame.filled{border-style:solid;border-color:var(--mint);}
+.retake-btn{position:absolute;top:8px;right:8px;background:rgba(21,34,37,.65);color:#fff;font-size:12.5px;
+  padding:5px 10px;border-radius:20px;z-index:2;}
+.link-btn{background:none;border:none;color:var(--tide-teal);font-size:14px;font-weight:700;
+  text-decoration:underline;cursor:pointer;padding:0;}
+.step-back{font-size:13.5px;color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;}
+#stationsMap{width:100%;height:230px;border:0;margin:0;background:var(--sand);}
+.badge-row-sm{display:flex;gap:6px;margin-top:8px;}
+.mini-pill{font-size:12px;font-weight:700;padding:5px 9px;border-radius:20px;background:var(--sand-deep);color:var(--ink-soft);}
+.mini-pill.ok{background:var(--mint);color:var(--tide-teal-dark);}
+
+/* 3단계 안내 카드 */
+.step-num-row{display:flex;flex-direction:column;gap:8px;}
+.step-num-card{background:var(--sand);border-radius:12px;padding:12px 14px;font-size:14.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:10px;}
+.step-num-card .num{width:22px;height:22px;border-radius:50%;background:var(--sunset);color:#fff;font-size:13.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hint-text{font-size:13px;color:var(--ink-soft);margin-top:5px;line-height:1.5;}
+
+/* 약관 동의 아이템 */
+.consent-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:var(--sand);}
+.consent-item label{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14.5px;font-weight:700;color:var(--ink);}
+.consent-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--sunset);flex-shrink:0;}
+.consent-item .chev{margin-left:auto;color:var(--ink-soft);font-size:12.5px;cursor:pointer;padding:4px;}
+.consent-detail{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-soft);line-height:1.6;}
+.disclosure-text{margin-top:16px;font-size:12px;color:var(--ink-soft);line-height:1.7;padding:12px;background:var(--sand);border-radius:10px;}
+
+/* 장소 리스트 (row 형태) */
+.station-row{display:flex;align-items:center;gap:12px;background:var(--white);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border:1px solid rgba(20,184,166,.08);cursor:pointer;}
+.station-row.done{border-color:var(--mint);}
+.ring{width:36px;height:36px;border-radius:50%;border:2.5px dashed var(--sunset);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--tide-teal);}
+.ring.done{border-style:solid;border-color:var(--tide-teal);background:var(--mint);}
+.station-row-info{flex:1;min-width:0;}
+.station-row-info h4{margin:0;font-size:16px;font-weight:800;color:var(--ink);}
+.pill-btn{border:1.5px solid var(--sunset);color:var(--sunset);background:none;border-radius:20px;padding:8px 14px;font-size:13.5px;font-weight:700;flex-shrink:0;cursor:pointer;}
+.station-row.done .pill-btn{border-color:var(--tide-teal);color:var(--tide-teal-dark);}
+.test-pill{border:1.5px dashed var(--ink-soft);color:var(--ink-soft);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;}
+
+/* 인증 모달(바텀시트) */
+.modal-backdrop{position:fixed;inset:0;background:rgba(35,50,56,.55);display:flex;align-items:flex-end;z-index:50;}
+.modal-sheet{background:var(--white);border-radius:22px 22px 0 0;padding:22px 18px 26px;width:100%;max-width:480px;margin:0 auto;max-height:85vh;overflow-y:auto;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.modal-head h3{margin:0;font-size:19px;font-weight:800;color:var(--tide-teal-dark);}
+.modal-close{font-size:18px;color:var(--ink-soft);cursor:pointer;padding:4px;}
+.modal-section{margin-top:16px;}
+.modal-section-title{font-size:15.5px;font-weight:800;color:var(--ink);margin-bottom:8px;}
+.modal-divider{height:1px;background:var(--line);margin:18px 0;}
+.gps-btn-outline{width:100%;padding:12px;border:1.5px solid var(--sunset);border-radius:12px;background:none;color:var(--sunset);font-size:15.5px;font-weight:700;cursor:pointer;}
+
+/* 완료 화면 체크 아이콘 */
+.done-check{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--sunset),var(--tide-teal));color:#fff;font-size:38.5px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.info-box{background:var(--mint);color:var(--tide-teal-dark);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.6;margin-top:10px;}
+.wizard-card .field input{background:var(--sand);color:var(--ink);border:1px solid var(--line);}
+.wizard-card .field input::placeholder{color:var(--ink-soft);opacity:.6;}
+.wizard-card .field input:disabled{opacity:.55;}
+.wizard-card .field label{color:var(--ink-soft);opacity:1;}
+.wizard-card .consent{opacity:1;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* =====================================================================
+   설정값 — 보고서 내용 기반. 실제 운영 전 문구·경품 배분은 반드시 재검증할 것.
+   ===================================================================== */
+/* =====================================================================
+   설정값 — 보고서 내용 기반. 실제 운영 전 문구·경품 배분은 반드시 재검증할 것.
+   ===================================================================== */
+const CONFIG = {
+  eventName: "가을 보령생태로드",
+  eventSub: "모바일 생태관광 스탬프 투어",
+  period: "2026.09.14 ~ 11.30",
+  periodNote: "기간 내 예산 소진 시 이벤트 조기 종료",
+  target: "만 14세 이상 누구나",
+  host: "해양환경공단 · 보령시",
+
+  adminEmail: "whiteoks@koem.or.kr",
+  webAppUrl: "https://script.google.com/macros/s/AKfycbzQDGGVexkWFreR89-M8mfnCvsbXVPeDRGp7HbVFfOwb7PdXos9lVpSUyrIMDnzQBJl/exec",
+
+  // ⚠ 좌표는 공개 정보 기반 추정치. 관리자 테스트 모드에서 현장 실측 후 갱신 권장.
+  stations: [
+    {
+      id: "sohwang",
+      name: "소황사구 해양보호구역",
+      tag: "생태·경관 보전지역",
+      desc: "국내 유일의 해안사구이자 국내 첫 번째 해양경관보호구역(2018.12 지정)입니다.",
+      photoHint: "현장 안내판(소황사구 표지판)이 잘 보이도록 촬영해주세요.",
+      lat: 36.2795, lng: 126.4735, radiusM: 200
+    },
+    {
+      id: "dakbyeoseul",
+      name: "무창포해수욕장",
+      tag: "갯벌생태계 복원지역",
+      desc: "연륙교 제거·교량화를 통해 해수 유통과 침·퇴적현상을 개선한 갯벌 생태계 복원사업 현장입니다(2021.12 완료).",
+      photoHint: "현장 안내판(닭벼슬섬 표지판)이 잘 보이도록 촬영해주세요.",
+      lat: 36.2975, lng: 126.4890, radiusM: 200
+    },
+    {
+      id: "gunheon",
+      name: "군헌어촌체험휴양마을",
+      tag: "낙조·어촌생태 체험지역",
+      desc: "충남 보령시 오천면의 갯벌체험 휴양마을. 서해 갯벌과 어촌 정취를 즐길 수 있습니다.",
+      photoHint: "현장 안내판(군헌어촌체험마을 표지판)이 잘 보이도록 촬영해주세요.",
+      lat: 36.3695, lng: 126.5285, radiusM: 200
+    }
+  ],
+
+  gifts: [
+    { icon: "🎟️", name: "보령사랑상품권 1만원권", desc: "스탬프 투어 참여자 대상 선착순 200명" },
+    { icon: "🍜", name: "군헌마을 2만원 이용권", desc: "사진 인증·SNS 홍보 참여자 대상 추첨 60명" },
+    { icon: "🌾", name: "만세보령 쌀 4kg", desc: "사진 인증·SNS 홍보 참여자 대상 추첨 40명" }
+  ],
+
+  consents: [
+    {
+      id: "privacy",
+      label: "[필수] 개인정보 수집·이용 동의",
+      detail: "수집 항목: 이름, 휴대폰번호, 이메일, 방문 인증 사진 · 목적: 스탬프 투어 응모 및 상품권 지급 안내 · 보유기간: 행사 종료 후 지급 완료 시까지(이후 파기). 동의를 거부할 수 있으나, 거부 시 스탬프 투어 참여가 제한됩니다."
+    },
+    {
+      id: "notice",
+      label: "[필수] 이벤트 유의사항 동의",
+      detail: "본 이벤트는 예산 소진 시 조기 종료될 수 있습니다. 허위 위치·사진 인증이 확인될 경우 응모가 취소될 수 있습니다. 경품은 선착순/추첨 결과에 따라 개별 안내됩니다."
+    },
+    {
+      id: "photo",
+      label: "[필수] 사진 수집·이용 동의",
+      detail: "방문 인증을 위해 촬영한 사진은 이벤트 진행 및 결과 확인 목적으로만 사용되며, 사전 동의 없이 홍보 등 다른 목적으로 사용되지 않습니다."
+    }
+  ]
+};
+
+/* =====================================================================
+   상태 관리
+   ===================================================================== */
+let state = {
+  loaded:false,
+  testMode:false,
+
+  step:"consent",        // 'consent' | 'location' | 'done' | 'lookup'
+  returnStep:"consent",   // lookup에서 뒤로가기 시 돌아갈 단계
+
+  identity:{
+    name:"", phone:"", email:"",
+    codeSent:false, sending:false,
+    code:"", verifying:false, verified:false,
+    error:""
+  },
+  consents:{ privacy:false, notice:false, photo:false },
+  expandedConsent:{},
+
+  modalStation:null,      // 인증 모달이 열려있는 station id
+
+  photos:{},
+  visited:{},
+  gpsStatus:{},
+
+  entry:null,             // { entryNo, submittedAt, seqNo, firstComeText }
+  autoSubmit:null,
+
+  confirmingReset:false,
+
+  lookup:{ name:"", phone:"", searching:false, result:null, error:"", notFound:false }
+};
+
+const STORAGE_KEY = "boryeong-stamp-progress-v4";
+let memoryFallback = {};
+
+/* Claude 아티팩트(window.storage) → 일반 브라우저(localStorage) → 메모리 순 자동 폴백 */
+async function storageGet(key){
+  if(typeof window !== "undefined" && window.storage && typeof window.storage.get === "function"){
+    try{
+      const res = await window.storage.get(key, false);
+      if(res && typeof res.value !== "undefined") return res.value;
+    }catch(e){}
+  }
+  try{
+    const v = localStorage.getItem(key);
+    if(v !== null) return v;
+  }catch(e){}
+  return memoryFallback[key] || null;
+}
+
+async function storageSet(key, value){
+  let saved = false;
+  if(typeof window !== "undefined" && window.storage && typeof window.storage.set === "function"){
+    try{ await window.storage.set(key, value, false); saved = true; }catch(e){}
+  }
+  if(!saved){
+    try{ localStorage.setItem(key, value); saved = true; }catch(e){}
+  }
+  if(!saved){ memoryFallback[key] = value; }
+}
+
+async function loadState(){
+  try{
+    const raw = await storageGet(STORAGE_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      state.step = saved.step || "consent";
+      state.identity = Object.assign(state.identity, saved.identity || {});
+      state.consents = Object.assign(state.consents, saved.consents || {});
+      state.photos = saved.photos || {};
+      state.visited = saved.visited || {};
+      state.entry = saved.entry || null;
+    }
+  }catch(e){}
+  state.loaded = true;
+  render();
+}
+
+async function persist(){
+  try{
+    await storageSet(STORAGE_KEY, JSON.stringify({
+      step: state.step,
+      identity: state.identity,
+      consents: state.consents,
+      photos: state.photos,
+      visited: state.visited,
+      entry: state.entry
+    }));
+  }catch(e){ console.error("저장 실패", e); }
+}
+
+function esc(s){ const d=document.createElement("div"); d.textContent=String(s==null?"":s); return d.innerHTML; }
+
+/* =====================================================================
+   백엔드 통신
+   ===================================================================== */
+async function callBackend(action, payload){
+  const url = (CONFIG.webAppUrl || "").trim();
+  if(!url) return { ok:false, message:"webAppUrl이 설정되지 않았어요." };
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(Object.assign({ action }, payload))
+  });
+  return await res.json();
+}
+
+/* =====================================================================
+   본인 확인 (이메일 인증)
+   ===================================================================== */
+function validateIdentityInputs(){
+  const { name, phone, email } = state.identity;
+  if(!name.trim()){ state.identity.error = "성명을 입력해 주세요."; return false; }
+  if(!phone.trim()){ state.identity.error = "휴대전화번호를 입력해 주세요."; return false; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){ state.identity.error = "올바른 이메일 주소를 입력해 주세요."; return false; }
+  return true;
+}
+
+async function requestCode(){
+  state.identity.error = "";
+  if(!validateIdentityInputs()){ render(); return; }
+
+  state.identity.sending = true;
+  render();
+
+  try{
+    const res = await callBackend("requestCode", {
+      name: state.identity.name.trim(),
+      phone: state.identity.phone.trim(),
+      email: state.identity.email.trim()
+    });
+    if(res.duplicate){
+      state.identity.error = "이미 접수하신 내역이 있어요. 같은 분은 중복 참여가 어려워요.";
+    }else if(res.ok){
+      state.identity.codeSent = true;
+    }else{
+      state.identity.error = res.message || "인증번호 발송에 실패했어요. 잠시 후 다시 시도해주세요.";
+    }
+  }catch(e){
+    state.identity.error = "네트워크 오류로 인증번호를 보내지 못했어요.";
+  }
+  state.identity.sending = false;
+  persist();
+  render();
+}
+
+async function verifyCode(){
+  const codeInput = document.getElementById("otpInput");
+  const code = codeInput ? codeInput.value.trim() : state.identity.code;
+  state.identity.code = code;
+
+  if(!code){ state.identity.error = "인증번호를 입력해 주세요."; render(); return; }
+
+  state.identity.verifying = true;
+  state.identity.error = "";
+  render();
+
+  try{
+    const res = await callBackend("verifyCode", {
+      email: state.identity.email.trim(),
+      code: code
+    });
+    if(res.ok){
+      state.identity.verified = true;
+    }else{
+      state.identity.error = res.message || "인증번호가 올바르지 않거나 만료됐어요.";
+    }
+  }catch(e){
+    state.identity.error = "네트워크 오류로 인증에 실패했어요.";
+  }
+  state.identity.verifying = false;
+  persist();
+  render();
+}
+
+function testAutoVerify(){
+  if(!validateIdentityInputs()){ render(); return; }
+  state.identity.codeSent = true;
+  state.identity.verified = true;
+  state.identity.error = "";
+  persist();
+  render();
+}
+
+function updateIdentityField(field, value){
+  state.identity[field] = value;
+}
+
+function toggleConsentItem(id){
+  state.consents[id] = !state.consents[id];
+  render();
+}
+
+function toggleExpandConsent(id){
+  state.expandedConsent[id] = !state.expandedConsent[id];
+  render();
+}
+
+function allConsentsChecked(){
+  return CONFIG.consents.every(c => !!state.consents[c.id]);
+}
+
+function startTour(){
+  if(!state.identity.verified || !allConsentsChecked()) return;
+  state.step = "location";
+  persist();
+  render();
+}
+
+/* =====================================================================
+   응모 내역 조회
+   ===================================================================== */
+function openLookup(fromStep){
+  state.returnStep = fromStep || state.step;
+  state.step = "lookup";
+  state.lookup = { name:"", phone:"", searching:false, result:null, error:"", notFound:false };
+  render();
+}
+
+function closeLookup(){
+  state.step = state.returnStep;
+  render();
+}
+
+async function checkExisting(){
+  const nameInput = document.getElementById("lookupName");
+  const phoneInput = document.getElementById("lookupPhone");
+  const name = nameInput ? nameInput.value.trim() : "";
+  const phone = phoneInput ? phoneInput.value.trim() : "";
+
+  if(!phone){ state.lookup.error = "휴대전화번호를 입력해 주세요."; render(); return; }
+
+  state.lookup.name = name;
+  state.lookup.phone = phone;
+  state.lookup.searching = true;
+  state.lookup.error = "";
+  state.lookup.result = null;
+  state.lookup.notFound = false;
+  render();
+
+  try{
+    const res = await callBackend("checkStatus", { query: phone, name });
+    if(res.found){
+      state.lookup.result = res;
+    }else{
+      state.lookup.notFound = true;
+    }
+  }catch(e){
+    state.lookup.error = "조회 중 오류가 발생했어요.";
+  }
+  state.lookup.searching = false;
+  render();
+}
+
+/* =====================================================================
+   장소 인증 (GPS 방문 인증 + 현장 안내판 사진) - 모달 방식
+   ===================================================================== */
+function haversineM(lat1, lon1, lat2, lon2){
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function openStationModal(stationId){
+  state.modalStation = stationId;
+  render();
+}
+
+function closeStationModal(){
+  state.modalStation = null;
+  render();
+}
+
+function checkIn(stationId){
+  const station = CONFIG.stations.find(s => s.id === stationId);
+  if(!station || state.visited[stationId]) return;
+
+  if(!navigator.geolocation){
+    state.gpsStatus[stationId] = {message:"이 브라우저에서는 위치 확인을 지원하지 않아요.", warn:true};
+    render(); return;
+  }
+
+  state.gpsStatus[stationId] = {loading:true, message:"현재 위치를 확인하는 중..."};
+  render();
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const dist = Math.round(haversineM(pos.coords.latitude, pos.coords.longitude, station.lat, station.lng));
+      if(dist <= station.radiusM){
+        state.visited[stationId] = new Date().toISOString();
+        state.gpsStatus[stationId] = {message:`방문 인증 완료! (약 ${dist}m)`};
+        persist();
+      }else{
+        state.gpsStatus[stationId] = {message:`반경 ${station.radiusM}m 밖이에요 (현재 약 ${dist.toLocaleString()}m 떨어짐)`, warn:true};
+      }
+      render();
+    },
+    err => {
+      let msg = "위치 확인에 실패했어요. 위치 권한을 확인해 주세요.";
+      if(err.code === 1) msg = "위치 권한이 거부되었어요. 브라우저 설정에서 위치 권한을 허용해 주세요.";
+      if(err.code === 3) msg = "위치 확인이 지연되고 있어요. 다시 시도해 주세요.";
+      state.gpsStatus[stationId] = {message:msg, warn:true};
+      render();
+    },
+    { enableHighAccuracy:true, timeout:12000, maximumAge:0 }
+  );
+}
+
+function testCheckIn(stationId){
+  state.visited[stationId] = new Date().toISOString();
+  state.gpsStatus[stationId] = {message:"테스트 모드로 위치인증 되었습니다."};
+  persist();
+  render();
+}
+
+function triggerPhotoCapture(stationId){
+  const input = document.getElementById("photoInput-" + stationId);
+  if(input) input.click();
+}
+
+function handlePhotoSelect(event, stationId){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const MAX_W = 1280;
+      const scale = Math.min(1, MAX_W / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+      const base64 = dataUrl.split(",")[1];
+
+      state.photos[stationId] = { dataUrl, base64, mimeType: "image/jpeg" };
+      persist();
+      render();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function retakePhoto(stationId){
+  delete state.photos[stationId];
+  persist();
+  render();
+}
+
+function testSkipPhoto(stationId){
+  state.photos[stationId] = { dataUrl:"", base64:"", mimeType:"image/jpeg", skipped:true };
+  persist();
+  render();
+}
+
+function isStationDone(stationId){
+  return !!state.visited[stationId]; // 방문(GPS) 인증만 필수, 사진은 선택사항
+}
+
+function allStationsReady(){
+  return CONFIG.stations.every(s => isStationDone(s.id));
+}
+
+function submitLocationStep(){
+  if(!allStationsReady()) return;
+  finalSubmit();
+}
+
+/* =====================================================================
+   지도 (Leaflet + OpenStreetMap, API 키 불필요) - 3곳을 한 지도에 표시
+   ===================================================================== */
+let leafletMapInstance = null;
+
+function initStationsMap(){
+  const mapEl = document.getElementById("stationsMap");
+  if(!mapEl || typeof L === "undefined") return;
+
+  if(leafletMapInstance){
+    leafletMapInstance.remove();
+    leafletMapInstance = null;
+  }
+
+  leafletMapInstance = L.map("stationsMap", { zoomControl:true, scrollWheelZoom:false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(leafletMapInstance);
+
+  const markers = CONFIG.stations.map(s => {
+    const done = isStationDone(s.id);
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="width:26px;height:26px;border-radius:50%;background:${done?'#C2410C':'#D97706'};border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);"></div>`,
+      iconSize:[26,26], iconAnchor:[13,13]
+    });
+    return L.marker([s.lat, s.lng], { icon }).addTo(leafletMapInstance).bindPopup(esc(s.name));
+  });
+
+  const group = L.featureGroup(markers);
+  const bounds = group.getBounds();
+  if(bounds.isValid()){
+    leafletMapInstance.fitBounds(bounds.pad(0.35));
+  }else{
+    leafletMapInstance.setView([CONFIG.stations[0].lat, CONFIG.stations[0].lng], 12);
+  }
+}
+
+/* =====================================================================
+   접수 완료 / 최종 제출
+   ===================================================================== */
+function getVisitedNamesList(){
+  return CONFIG.stations.map(s => s.name);
+}
+
+function buildMailtoLink(entry){
+  const visitedNames = getVisitedNamesList().map(s => `- ${s}`).join("\n");
+  const subject = `[가을 보령생태로드] 스탬프투어 응모 - ${state.identity.name}`;
+  const body =
+`가을 보령생태로드 모바일 스탬프 투어 응모 접수 (자동전송 실패로 수동 발송)
+
+응모번호 : ${entry.entryNo}
+성명     : ${state.identity.name}
+연락처   : ${state.identity.phone}
+이메일   : ${state.identity.email}
+제출시각 : ${new Date(entry.submittedAt).toLocaleString('ko-KR')}
+
+[방문 인증 내역]
+${visitedNames}
+
+※ 사진 파일은 이 메일에 자동 첨부되지 않았습니다.
+`;
+  const to = (CONFIG.adminEmail || "").trim();
+  return `mailto:${encodeURIComponent(to).replace(/%40/g,'@')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+async function finalSubmit(){
+  const entryNo = "BR" + Date.now().toString().slice(-8);
+  const submittedAt = new Date().toISOString();
+  state.entry = { entryNo, submittedAt };
+  state.step = "done";
+  state.autoSubmit = "sending";
+  persist();
+  render();
+
+  const photosPayload = CONFIG.stations.map(s => {
+    const p = state.photos[s.id] || {};
+    return { stationId: s.id, stationName: s.name, base64: p.base64 || "", mimeType: p.mimeType || "image/jpeg", skipped: !!p.skipped };
+  });
+
+  try{
+    const res = await callBackend("submitEntry", {
+      name: state.identity.name.trim(),
+      phone: state.identity.phone.trim(),
+      email: state.identity.email.trim(),
+      entryNo,
+      submittedAt: new Date(submittedAt).toLocaleString('ko-KR'),
+      visitedStations: getVisitedNamesList(),
+      photos: photosPayload
+    });
+    state.autoSubmit = res.ok ? "sent" : "failed";
+    if(res.ok){
+      state.entry.seqNo = res.seqNo || null;
+      state.entry.firstComeText = res.firstComeText || "";
+    }
+  }catch(e){
+    state.autoSubmit = "failed";
+  }
+  persist();
+  render();
+}
+
+/* =====================================================================
+   테스트 모드 / 초기화
+   ===================================================================== */
+function toggleTestMode(){
+  state.testMode = !state.testMode;
+  render();
+}
+
+function askResetProgress(){ state.confirmingReset = true; render(); }
+function cancelResetProgress(){ state.confirmingReset = false; render(); }
+
+function resetProgress(){
+  state.step = "consent";
+  state.identity = { name:"", phone:"", email:"", codeSent:false, sending:false, code:"", verifying:false, verified:false, error:"" };
+  state.consents = { privacy:false, notice:false, photo:false };
+  state.expandedConsent = {};
+  state.modalStation = null;
+  state.photos = {};
+  state.visited = {};
+  state.gpsStatus = {};
+  state.entry = null;
+  state.autoSubmit = null;
+  state.confirmingReset = false;
+  persist();
+  render();
+}
+
+/* =====================================================================
+   렌더링
+   ===================================================================== */
+function render(){
+  const app = document.getElementById("app");
+  if(!state.loaded){
+    app.innerHTML = `<div style="padding:60px 20px;text-align:center;color:#8A6F55;font-size:13px;">불러오는 중...</div>`;
+    return;
+  }
+
+  app.innerHTML = `
+    ${renderHeader()}
+    ${state.step === "consent" ? renderConsentStep() : ""}
+    ${state.step === "location" ? renderLocationStep() : ""}
+    ${state.step === "done" ? renderDoneStep() : ""}
+    ${state.step === "lookup" ? renderLookupStep() : ""}
+    ${state.modalStation ? renderStationModal() : ""}
+    ${state.step !== "lookup" ? `
+      <div class="footer-note">
+        <b>주최</b> ${CONFIG.host} · <b>기간</b> ${CONFIG.period}<br>
+        <span class="warn-line">※ ${CONFIG.periodNote}</span>
+      </div>
+    ` : ""}
+  `;
+
+  if(state.step === "location" || state.modalStation){
+    CONFIG.stations.forEach(station => {
+      const input = document.getElementById("photoInput-" + station.id);
+      if(input){
+        input.onchange = (e) => handlePhotoSelect(e, station.id);
+      }
+    });
+  }
+
+  if(state.step === "location"){
+    if(typeof L !== "undefined"){
+      initStationsMap();
+    }else{
+      window.addEventListener("load", () => { if(state.step === "location") render(); }, { once:true });
+    }
+  }
+}
+
+function renderHeader(){
+  const doneCount = CONFIG.stations.filter(s => isStationDone(s.id)).length;
+  const showCounter = state.step === "location" || state.step === "done";
+  return `
+    <div class="hero">
+      <div class="top-row">
+        <div class="brand">보령시 <span class="x">×</span> 해양환경공단</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${showCounter ? `<span class="badge" style="background:rgba(255,255,255,.22);">${doneCount}/${CONFIG.stations.length} 인증</span>` : ""}
+          <div class="test-toggle" onclick="toggleTestMode()">
+            테스트
+            <div class="switch ${state.testMode?'on':''}"><div class="knob"></div></div>
+          </div>
+        </div>
+      </div>
+      ${state.step === "consent" ? `
+        <h1>${CONFIG.eventName}<br><em>${CONFIG.eventSub}</em></h1>
+        <p class="sub">가을, 보령의 세 곳을 걸으며 스탬프를 모으세요.</p>
+        <div class="badge-row">
+          <span class="badge">📅 ${CONFIG.period}</span>
+          <span class="badge">👤 ${CONFIG.target}</span>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+function renderConsentStep(){
+  const id = state.identity;
+
+  return `
+    <div class="wizard-card">
+      <div class="step-num-row">
+        <div class="step-num-card"><span class="num">1</span> 3개 관광지를 방문하고</div>
+        <div class="step-num-card"><span class="num">2</span> '방문 인증'과 '사진 인증'을 하면</div>
+        <div class="step-num-card"><span class="num">3</span> 3곳 완주 시 자동 응모 → 선착순 상품권</div>
+      </div>
+
+      <h2 style="margin-top:18px;">참여자 정보</h2>
+      <div class="field">
+        <label>이름</label>
+        <input type="text" value="${esc(id.name)}" placeholder="홍길동" ${id.codeSent?'disabled':''}
+          oninput="updateIdentityField('name', this.value)">
+      </div>
+      <div class="field">
+        <label>휴대폰 번호</label>
+        <input type="tel" value="${esc(id.phone)}" placeholder="010-0000-0000" ${id.codeSent?'disabled':''}
+          oninput="updateIdentityField('phone', this.value)">
+        <div class="hint-text">휴대폰 1개당 이메일 1개만 인증할 수 있어요.</div>
+      </div>
+      <div class="field">
+        <label>이메일 (인증 필요)</label>
+        <div class="otp-row">
+          <input type="email" value="${esc(id.email)}" placeholder="you@example.com" ${id.codeSent?'disabled':''}
+            oninput="updateIdentityField('email', this.value)">
+          ${!id.codeSent ? `<button class="gps-btn" style="width:auto;" onclick="requestCode()" ${id.sending?'disabled':''}>${id.sending?'발송중':'인증번호 받기'}</button>` : ""}
+        </div>
+      </div>
+
+      ${id.error ? `<div class="gps-feedback warn" style="margin:8px 0;">${esc(id.error)}</div>` : ""}
+
+      ${id.codeSent && !id.verified ? `
+        <div class="field" style="margin-top:10px;">
+          <label>인증번호 (6자리)</label>
+          <div class="otp-row">
+            <input type="text" inputmode="numeric" maxlength="6" id="otpInput" placeholder="123456" value="${esc(id.code)}">
+            <button class="gps-btn" style="width:auto;" onclick="verifyCode()" ${id.verifying?'disabled':''}>${id.verifying?'확인중':'인증하기'}</button>
+          </div>
+        </div>
+        <button class="link-btn" style="margin-top:8px;" onclick="requestCode()">인증번호 다시 받기</button>
+      ` : ""}
+
+      ${id.verified ? `<div class="success-box" style="margin-top:12px;">✔ 이메일 인증 완료</div>` : ""}
+
+      ${state.testMode && !id.verified ? `<button class="test-btn" style="margin-top:12px;" onclick="testAutoVerify()">🧪 이메일 인증 건너뛰기 (테스트)</button>` : ""}
+
+      <div class="modal-divider"></div>
+
+      <h3 style="font-size:14px;color:var(--tide-teal-dark);margin:0 0 10px;">약관 동의 <span style="font-size:11px;font-weight:500;color:var(--ink-soft);">— 항목을 누르면 내용이 펼쳐집니다</span></h3>
+
+      ${CONFIG.consents.map(c => `
+        <div class="consent-item">
+          <label>
+            <input type="checkbox" ${state.consents[c.id]?'checked':''} onclick="toggleConsentItem('${c.id}')">
+            <span>${esc(c.label)}</span>
+            <span class="chev" onclick="event.preventDefault();toggleExpandConsent('${c.id}')">${state.expandedConsent[c.id]?'▲':'▼'}</span>
+          </label>
+          ${state.expandedConsent[c.id] ? `<div class="consent-detail">${esc(c.detail)}</div>` : ""}
+        </div>
+      `).join("")}
+
+      <button class="gps-btn" style="margin-top:16px;" onclick="startTour()" ${(id.verified && allConsentsChecked())?'':'disabled'}>동의하고 시작하기</button>
+      ${!id.verified ? `<div class="hint-text" style="text-align:center;margin-top:8px;">이메일 인증을 완료해야 시작할 수 있어요.</div>` : ""}
+
+      <div style="text-align:center;margin-top:14px;">
+        <button class="link-btn" onclick="openLookup('consent')">이미 참여했어요 — 응모 조회</button>
+      </div>
+
+      <div class="disclosure-text">
+        수집 항목: 이름, 휴대폰번호, 이메일, 방문 인증 사진 · 목적: 스탬프 투어 응모 및 상품권 지급 안내 ·
+        보유기간: 행사 종료 후 지급 완료 시까지(이후 파기). 수집 정보는 운영자 이메일(${esc(CONFIG.adminEmail)})로 접수됩니다.
+      </div>
+    </div>
+  `;
+}
+
+function renderLocationStep(){
+  const doneCount = CONFIG.stations.filter(s => isStationDone(s.id)).length;
+
+  return `
+    <div id="stationsMap"></div>
+
+    <div class="section">
+      <div class="section-head">
+        <h3 style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span>스탬프 (${doneCount}/${CONFIG.stations.length})</span>
+          <span style="font-size:11.5px;font-weight:500;color:var(--ink-soft);">반경 200m 방문 인증 (사진 첨부는 선택)</span>
+        </h3>
+      </div>
+
+      ${CONFIG.stations.map(station => {
+        const photo = state.photos[station.id];
+        const visited = !!state.visited[station.id];
+        const done = visited; // 방문 인증만 필수, 사진은 선택
+        return `
+          <div class="station-row ${done?'done':''}" onclick="openStationModal('${station.id}')">
+            <div class="ring ${done?'done':''}">${done?'✓':''}</div>
+            <div class="station-row-info">
+              <h4>${esc(station.name)}</h4>
+              <div class="badge-row-sm">
+                <span class="mini-pill ${visited?'ok':''}">${visited?'방문완료':'방문 대기'}</span>
+                <span class="mini-pill ${photo?'ok':''}">${photo?'사진 첨부됨':'사진 선택안함'}</span>
+              </div>
+            </div>
+            <button class="pill-btn" onclick="event.stopPropagation();openStationModal('${station.id}')">${done?'완료':'인증하기'}</button>
+          </div>
+        `;
+      }).join("")}
+
+      <button class="gps-btn" style="margin-top:16px;" onclick="submitLocationStep()" ${allStationsReady()?'':'disabled'}>
+        접수 완료하기
+      </button>
+
+      ${state.testMode ? `<div style="text-align:center;margin-top:14px;"><span class="test-pill">테스트 모드 ON</span></div>` : ""}
+    </div>
+  `;
+}
+
+function renderStationModal(){
+  const station = CONFIG.stations.find(s => s.id === state.modalStation);
+  if(!station) return "";
+  const photo = state.photos[station.id];
+  const visited = !!state.visited[station.id];
+  const status = state.gpsStatus[station.id] || {};
+
+  return `
+    <div class="modal-backdrop" onclick="closeStationModal()">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-head">
+          <h3>${esc(station.name)}</h3>
+          <span class="modal-close" onclick="closeStationModal()">✕</span>
+        </div>
+        <p class="lead">${esc(station.desc)}</p>
+
+        <div class="modal-section">
+          <div class="modal-section-title">1. 방문 인증 (위치)</div>
+          ${visited ? `
+            <div class="success-box">✔ 방문 인증 완료</div>
+          ` : `
+            <p class="hint-text">이 관광지 반경 ${station.radiusM}m 안에서 눌러 주세요.</p>
+            <button class="gps-btn" onclick="checkIn('${station.id}')" ${status.loading?'disabled':''}>${status.loading?'위치 확인 중...':'방문 인증하기'}</button>
+            ${status.message ? `<div class="gps-feedback ${status.warn?'warn':''}">${esc(status.message)}</div>` : ""}
+            ${state.testMode ? `<button class="test-btn" onclick="testCheckIn('${station.id}')">🧪 GPS 없이 인증 (테스트)</button>` : ""}
+          `}
+        </div>
+
+        <div class="modal-divider"></div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">2. 사진 첨부 <span style="font-weight:500;color:var(--ink-soft);">(선택)</span></div>
+          <p class="hint-text">방문 인증만으로도 완주 처리돼요. 사진을 남기고 싶다면 첨부해주세요 (선택).</p>
+
+          <input type="file" accept="image/*" capture="environment" id="photoInput-${station.id}" style="display:none;">
+
+          ${photo ? `
+            <div class="photo-frame filled">
+              ${photo.skipped ? `<div style="padding:20px;text-align:center;">🧪 테스트로 건너뜀</div>` : `<img src="${photo.dataUrl}" alt="${esc(station.name)} 인증사진">`}
+              <button class="retake-btn" onclick="event.stopPropagation();retakePhoto('${station.id}')">다시 찍기</button>
+            </div>
+          ` : `
+            <button class="gps-btn-outline" onclick="triggerPhotoCapture('${station.id}')">📷 사진 첨부하기 (선택)</button>
+          `}
+        </div>
+
+        ${visited ? `<button class="gps-btn" style="margin-top:14px;" onclick="closeStationModal()">닫기</button>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function renderDoneStep(){
+  const entry = state.entry || {};
+  let statusMsg = "";
+
+  if(state.autoSubmit === "sending"){
+    statusMsg = "접수 처리 중이에요...";
+  }else if(state.autoSubmit === "sent"){
+    statusMsg = "세 곳의 스탬프를 모두 모았습니다. 참여해 주셔서 감사합니다.";
+  }else if(state.autoSubmit === "failed"){
+    statusMsg = "⚠ 자동 접수 중 오류가 발생했어요. 아래 버튼으로 메일을 직접 보내주세요.";
+  }
+
+  return `
+    <div class="wizard-card" style="text-align:center;">
+      <div class="done-check">✓</div>
+      <h2>응모가 완료되었어요!</h2>
+      <p class="lead">${statusMsg}</p>
+
+      <div class="success-box" style="margin-top:8px;">
+        <div>응모번호</div>
+        <div class="no">${esc(entry.entryNo || "")}</div>
+        ${entry.seqNo ? `<p>${esc(entry.firstComeText || "")} · 선착순 ${esc(entry.seqNo)}번째 응모</p>` : ""}
+      </div>
+
+      ${state.autoSubmit === "sent" ? `
+        <div class="info-box">응모 정보와 첨부 사진이 운영자 이메일(${esc(CONFIG.adminEmail)})로 접수됩니다.</div>
+      ` : ""}
+      ${state.autoSubmit === "failed" ? `
+        <button class="submit-btn" style="margin-top:12px;" onclick="window.location.href='${buildMailtoLink(entry)}'">담당자에게 메일 보내기</button>
+      ` : ""}
+
+      <p class="hint-text" style="margin-top:14px;">이 화면은 언제든 <b>응모 조회</b>에서 다시 확인할 수 있어요.</p>
+      <button class="gps-btn-outline" onclick="openLookup('done')">응모 내역 조회</button>
+
+      <div style="margin-top:18px;">
+        ${state.confirmingReset ? `
+          <div class="gps-feedback warn" style="margin-bottom:8px;">정말 초기화할까요? 모든 진행상황이 지워져요.</div>
+          <div style="display:flex;gap:8px;">
+            <button class="gps-btn" style="background:var(--sunset);flex:1;" onclick="resetProgress()">예, 초기화</button>
+            <button class="gps-btn" style="background:var(--sand-deep);color:var(--ink);flex:1;" onclick="cancelResetProgress()">아니오</button>
+          </div>
+        ` : `
+          <button class="link-btn" onclick="askResetProgress()">처음부터 (테스트 초기화)</button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function renderLookupStep(){
+  const lk = state.lookup;
+  return `
+    <div class="wizard-card">
+      <h2>응모 내역 조회</h2>
+      <p class="lead">참여 시 입력한 이름과 휴대폰 번호로 진행 상황을 확인합니다.</p>
+
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="lookupName" value="${esc(lk.name)}" placeholder="홍길동">
+      </div>
+      <div class="field">
+        <label>휴대폰 번호</label>
+        <input type="tel" id="lookupPhone" value="${esc(lk.phone)}" placeholder="010-1234-5678">
+      </div>
+
+      <button class="gps-btn" onclick="checkExisting()" ${lk.searching?'disabled':''}>${lk.searching?'조회 중...':'조회하기'}</button>
+
+      ${lk.error ? `<div class="gps-feedback warn" style="margin-top:10px;">${esc(lk.error)}</div>` : ""}
+      ${lk.notFound ? `<div class="gps-feedback warn" style="margin-top:10px;">접수 내역을 찾을 수 없어요.</div>` : ""}
+      ${lk.result ? `
+        <div class="success-box" style="margin-top:12px;">
+          <div>응모번호</div>
+          <div class="no">${esc(lk.result.entryNo)}</div>
+          <p>접수시각: ${esc(lk.result.submittedAt)}</p>
+        </div>
+      ` : ""}
+
+      <div style="text-align:center;margin-top:16px;">
+        <button class="link-btn" onclick="closeLookup()">뒤로</button>
+      </div>
+    </div>
+  `;
+}
+
+render();
+loadState();
+</script>
+</body>
+</html>
+
